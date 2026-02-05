@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
 import io from 'socket.io-client';
 import { useAuth } from './AuthContext';
+import { SOCKET_URL } from '../utils/api';
 
 const SocketContext = createContext(null);
 
@@ -63,9 +64,9 @@ export const SocketProvider = ({ children }) => {
             }, 5000);
             return () => clearInterval(interval);
         } else {
-            const BACKEND_URL = window.location.hostname === 'localhost'
+            const BACKEND_URL = SOCKET_URL || (window.location.hostname === 'localhost'
                 ? 'http://localhost:5000'
-                : `http://${window.location.hostname}:5000`;
+                : `http://${window.location.hostname}:5000`);
 
             console.log(`Socket: Connecting to Backend at ${BACKEND_URL}...`);
             const socket = io(BACKEND_URL, {

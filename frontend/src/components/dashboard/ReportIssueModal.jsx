@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Send, Bot, User, AlertCircle, CheckCircle } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { API_URL } from '../../utils/api';
 
 const ReportIssueModal = ({ isOpen, onClose, tank }) => {
     const { user } = useAuth();
@@ -30,7 +31,7 @@ const ReportIssueModal = ({ isOpen, onClose, tank }) => {
 
         try {
             const token = localStorage.getItem('aquasentry_token');
-            const response = await fetch('/api/ai/chat', {
+            const response = await fetch(`${API_URL}/api/ai/chat`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -85,7 +86,7 @@ const ReportIssueModal = ({ isOpen, onClose, tank }) => {
 
             console.log('Issue Report Notification sent to admin:', notification);
 
-            await fetch('/api/ai/report-finalize', {
+            await fetch(`${API_URL}/api/ai/report-finalize`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

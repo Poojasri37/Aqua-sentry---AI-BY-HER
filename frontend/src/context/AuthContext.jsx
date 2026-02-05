@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { jwtDecode } from 'jwt-decode';
+import { API_URL } from '../utils/api';
 
 const AuthContext = createContext(null);
 
@@ -47,7 +48,7 @@ export const AuthProvider = ({ children }) => {
 
     const login = React.useCallback(async (email, password) => {
         try {
-            const response = await fetch('/api/auth/login', {
+            const response = await fetch(`${API_URL}/api/auth/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -73,7 +74,7 @@ export const AuthProvider = ({ children }) => {
 
     const register = React.useCallback(async (name, email, password, role) => {
         try {
-            const response = await fetch('/api/auth/register', {
+            const response = await fetch(`${API_URL}/api/auth/register`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
