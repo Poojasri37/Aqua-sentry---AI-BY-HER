@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import {
     LogOut, LayoutDashboard, Users, Activity, Settings, Bell, Map as MapIcon,
     ClipboardList, CheckCircle, XCircle, Bot, Droplets, AlertTriangle,
-    TrendingUp, TrendingDown, Download, ChevronRight, Filter
+    TrendingUp, TrendingDown, Download, ChevronRight, Filter, Radio, Eye, Mail, Users as UsersIcon
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import {
@@ -14,6 +14,10 @@ import {
 import TankMap from '../../components/dashboard/TankMap';
 import AlertsPanel from '../../components/dashboard/AlertsPanel';
 import AdminNotifications from '../../components/dashboard/AdminNotifications';
+import TelemetryLogs from '../../components/dashboard/TelemetryLogs';
+import VisionInspection from '../../components/dashboard/VisionInspection';
+import ContactMessages from '../../components/dashboard/ContactMessages';
+import NewsletterSubscribers from '../../components/dashboard/NewsletterSubscribers';
 import { generateTanksList, generatePendingRequests, generateReportedIssues } from '../../utils/mockData';
 import { useSocket } from '../../context/SocketContext';
 
@@ -293,73 +297,155 @@ const AdminDashboard = () => {
     ];
 
     return (
-        <div className="min-h-screen bg-gray-50 flex">
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/20 to-gray-50 flex">
             {/* Sidebar */}
-            <aside className="w-64 bg-slate-900 text-white hidden md:flex flex-col flex-shrink-0">
+            <motion.aside
+                initial={{ x: -100, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
+                className="w-64 bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 text-white hidden md:flex flex-col flex-shrink-0 shadow-2xl">
                 <div className="p-6">
-                    <div className="flex items-center gap-2 mb-8">
-                        <div className="w-8 h-8 bg-gov-green-500 rounded-lg flex items-center justify-center font-bold">A</div>
-                        <span className="text-xl font-bold">AquaSentry</span>
-                    </div>
+                    <motion.div
+                        initial={{ scale: 0.8, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ delay: 0.2, duration: 0.4 }}
+                        className="flex items-center gap-2 mb-8">
+                        <motion.div
+                            whileHover={{ rotate: 360, scale: 1.1 }}
+                            transition={{ duration: 0.6 }}
+                            className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center font-bold shadow-lg shadow-blue-500/50">
+                            <Droplets className="w-5 h-5" />
+                        </motion.div>
+                        <span className="text-xl font-bold tracking-tight">AquaSentry</span>
+                    </motion.div>
 
                     <nav className="space-y-2">
-                        <button
+                        <motion.button
                             onClick={() => setActiveTab('overview')}
-                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${activeTab === 'overview' ? 'bg-gov-green-600 text-white' : 'text-slate-400 hover:bg-slate-800'}`}
+                            whileHover={{ x: 4, scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${activeTab === 'overview' ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/30' : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'}`}
                         >
-                            <LayoutDashboard className="w-5 h-5" /> Overview
-                        </button>
-                        <button
+                            <LayoutDashboard className="w-5 h-5" />
+                            <span className="font-semibold">Overview</span>
+                        </motion.button>
+                        <motion.button
                             onClick={() => setActiveTab('users')}
-                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${activeTab === 'users' ? 'bg-gov-green-600 text-white' : 'text-slate-400 hover:bg-slate-800'}`}
+                            whileHover={{ x: 4, scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${activeTab === 'users' ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/30' : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'}`}
                         >
-                            <Users className="w-5 h-5" /> Registered Users
-                        </button>
-                        <button
+                            <Users className="w-5 h-5" />
+                            <span className="font-semibold">Registered Users</span>
+                        </motion.button>
+                        <motion.button
                             onClick={() => setActiveTab('requests')}
-                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${activeTab === 'requests' ? 'bg-gov-green-600 text-white' : 'text-slate-400 hover:bg-slate-800'}`}
+                            whileHover={{ x: 4, scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${activeTab === 'requests' ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/30' : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'}`}
                         >
-                            <ClipboardList className="w-5 h-5" /> Requests
-                            {requests.length > 0 && <span className="ml-auto bg-amber-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold">{requests.length}</span>}
-                        </button>
-                        <button
+                            <ClipboardList className="w-5 h-5" />
+                            <span className="font-semibold">Requests</span>
+                            {requests.length > 0 && <motion.span animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 2, repeat: Infinity }} className="ml-auto bg-amber-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold">{requests.length}</motion.span>}
+                        </motion.button>
+                        <motion.button
                             onClick={() => setActiveTab('tanks')}
-                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${activeTab === 'tanks' ? 'bg-gov-green-600 text-white' : 'text-slate-400 hover:bg-slate-800'}`}
+                            whileHover={{ x: 4, scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${activeTab === 'tanks' ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/30' : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'}`}
                         >
-                            <Activity className="w-5 h-5" /> All Tanks
-                        </button>
-                        <button
+                            <Activity className="w-5 h-5" />
+                            <span className="font-semibold">All Tanks</span>
+                        </motion.button>
+                        <motion.button
                             onClick={() => setActiveTab('map')}
-                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${activeTab === 'map' ? 'bg-gov-green-600 text-white' : 'text-slate-400 hover:bg-slate-800'}`}
+                            whileHover={{ x: 4, scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${activeTab === 'map' ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/30' : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'}`}
                         >
-                            <MapIcon className="w-5 h-5" /> Map View
-                        </button>
-                        <button
+                            <MapIcon className="w-5 h-5" />
+                            <span className="font-semibold">Map View</span>
+                        </motion.button>
+                        <motion.button
                             onClick={() => setActiveTab('alerts')}
-                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${activeTab === 'alerts' ? 'bg-gov-green-600 text-white' : 'text-slate-400 hover:bg-slate-800'}`}
+                            whileHover={{ x: 4, scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${activeTab === 'alerts' ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/30' : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'}`}
                         >
-                            <Bell className="w-5 h-5" /> Alerts
-                        </button>
-                        <button
+                            <Bell className="w-5 h-5" />
+                            <span className="font-semibold">Alerts</span>
+                        </motion.button>
+                        <motion.button
+                            onClick={() => setActiveTab('telemetry')}
+                            whileHover={{ x: 4, scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${activeTab === 'telemetry' ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/30' : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'}`}
+                        >
+                            <Radio className="w-5 h-5" />
+                            <span className="font-semibold">Telemetry</span>
+                        </motion.button>
+
+                        <motion.button
+                            onClick={() => setActiveTab('vision')}
+                            whileHover={{ x: 4, scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${activeTab === 'vision' ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/30' : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'}`}
+                        >
+                            <Eye className="w-5 h-5" />
+                            <span className="font-semibold">AI Vision</span>
+                        </motion.button>
+
+                        <motion.button
+                            onClick={() => setActiveTab('messages')}
+                            whileHover={{ x: 4, scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${activeTab === 'messages' ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/30' : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'}`}
+                        >
+                            <Mail className="w-5 h-5" />
+                            <span className="font-semibold">Messages</span>
+                        </motion.button>
+
+                        <motion.button
+                            onClick={() => setActiveTab('subscribers')}
+                            whileHover={{ x: 4, scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${activeTab === 'subscribers' ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/30' : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'}`}
+                        >
+                            <UsersIcon className="w-5 h-5" />
+                            <span className="font-semibold">Subscribers</span>
+                        </motion.button>
+
+                        <motion.button
                             onClick={() => setActiveTab('settings')}
-                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${activeTab === 'settings' ? 'bg-gov-green-600 text-white' : 'text-slate-400 hover:bg-slate-800'}`}
+                            whileHover={{ x: 4, scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${activeTab === 'settings' ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/30' : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'}`}
                         >
-                            <Settings className="w-5 h-5" /> Settings
-                        </button>
+                            <Settings className="w-5 h-5" />
+                            <span className="font-semibold">Settings</span>
+                        </motion.button>
                     </nav>
                 </div>
 
                 <div className="mt-auto p-6 border-t border-slate-800">
-                    <button onClick={handleLogout} className="flex items-center gap-3 text-slate-400 hover:text-white transition-colors">
-                        <LogOut className="w-5 h-5" /> Sign Out
-                    </button>
+                    <motion.button
+                        onClick={handleLogout}
+                        whileHover={{ x: 4 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="flex items-center gap-3 text-slate-400 hover:text-white transition-colors w-full px-4 py-3 rounded-xl hover:bg-red-500/10">
+                        <LogOut className="w-5 h-5" />
+                        <span className="font-semibold">Sign Out</span>
+                    </motion.button>
                 </div>
-            </aside>
+            </motion.aside>
 
             {/* Main Content */}
             <main className="flex-1 overflow-y-auto h-screen">
-                <header className="bg-white border-b border-gray-200 px-8 py-4 flex justify-between items-center sticky top-0 z-10">
-                    <h1 className="text-2xl font-bold text-gray-800">Admin Dashboard</h1>
+                <motion.header
+                    initial={{ y: -20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    className="bg-white/80 backdrop-blur-xl border-b border-gray-200 px-8 py-4 flex justify-between items-center sticky top-0 z-10 shadow-sm">
+                    <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Admin Dashboard</h1>
                     <div className="flex items-center gap-6">
                         {isConnected ? (
                             <div className="flex items-center gap-2 px-3 py-1 bg-green-50 text-green-600 rounded-full border border-green-100">
@@ -383,7 +469,7 @@ const AdminDashboard = () => {
                             </div>
                         </div>
                     </div>
-                </header>
+                </motion.header>
 
                 <div className="p-8 pb-20">
                     {/* Overview Tab */}
@@ -391,42 +477,82 @@ const AdminDashboard = () => {
                         <>
                             {/* Stats Grid */}
                             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                                <motion.div
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0 }}
+                                    whileHover={{ y: -4, scale: 1.02 }}
+                                    className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm hover:shadow-xl transition-all duration-300">
                                     <div className="flex items-center justify-between mb-3">
-                                        <h3 className="text-gray-500 text-sm font-medium">Total Regions</h3>
-                                        <MapIcon className="w-5 h-5 text-cyan-500" />
+                                        <h3 className="text-gray-500 text-sm font-semibold uppercase tracking-wide">Total Regions</h3>
+                                        <motion.div
+                                            animate={{ rotate: [0, 10, -10, 0] }}
+                                            transition={{ duration: 3, repeat: Infinity, repeatDelay: 2 }}
+                                        >
+                                            <MapIcon className="w-6 h-6 text-cyan-500" />
+                                        </motion.div>
                                     </div>
-                                    <p className="text-3xl font-bold text-gray-900">{regions.length}</p>
-                                    <p className="text-xs text-gray-400 mt-1">Across Tamil Nadu</p>
+                                    <p className="text-4xl font-black text-gray-900 mb-1">{regions.length}</p>
+                                    <p className="text-xs text-gray-500 font-medium">Across Tamil Nadu</p>
                                 </motion.div>
 
-                                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                                <motion.div
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.1 }}
+                                    whileHover={{ y: -4, scale: 1.02 }}
+                                    className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm hover:shadow-xl transition-all duration-300">
                                     <div className="flex items-center justify-between mb-3">
-                                        <h3 className="text-gray-500 text-sm font-medium">Total Tanks</h3>
-                                        <Droplets className="w-5 h-5 text-blue-500" />
+                                        <h3 className="text-gray-500 text-sm font-semibold uppercase tracking-wide">Total Tanks</h3>
+                                        <motion.div
+                                            animate={{ scale: [1, 1.1, 1] }}
+                                            transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
+                                        >
+                                            <Droplets className="w-6 h-6 text-blue-500" />
+                                        </motion.div>
                                     </div>
-                                    <p className="text-3xl font-bold text-gray-900">{isLoading ? '...' : totalTanks}</p>
-                                    <p className="text-xs text-emerald-600 mt-1 flex items-center gap-1">
+                                    <p className="text-4xl font-black text-gray-900 mb-1">{isLoading ? '...' : totalTanks}</p>
+                                    <p className="text-xs text-emerald-600 font-semibold flex items-center gap-1">
                                         <TrendingUp className="w-3 h-3" /> +12% from last month
                                     </p>
                                 </motion.div>
 
-                                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                                <motion.div
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.2 }}
+                                    whileHover={{ y: -4, scale: 1.02 }}
+                                    className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm hover:shadow-xl transition-all duration-300">
                                     <div className="flex items-center justify-between mb-3">
-                                        <h3 className="text-gray-500 text-sm font-medium">Active Alerts</h3>
-                                        <AlertTriangle className="w-5 h-5 text-red-500" />
+                                        <h3 className="text-gray-500 text-sm font-semibold uppercase tracking-wide">Active Alerts</h3>
+                                        <motion.div
+                                            animate={{ rotate: [0, -15, 15, 0] }}
+                                            transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
+                                        >
+                                            <AlertTriangle className="w-6 h-6 text-red-500" />
+                                        </motion.div>
                                     </div>
-                                    <p className="text-3xl font-bold text-red-600">{isLoading ? '...' : alertCount}</p>
-                                    <p className="text-xs text-gray-400 mt-1">Requires attention</p>
+                                    <p className="text-4xl font-black text-red-600 mb-1">{isLoading ? '...' : alertCount}</p>
+                                    <p className="text-xs text-gray-500 font-medium">Requires attention</p>
                                 </motion.div>
 
-                                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                                <motion.div
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.3 }}
+                                    whileHover={{ y: -4, scale: 1.02 }}
+                                    className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm hover:shadow-xl transition-all duration-300">
                                     <div className="flex items-center justify-between mb-3">
-                                        <h3 className="text-gray-500 text-sm font-medium">System Health</h3>
-                                        <Activity className="w-5 h-5 text-green-500" />
+                                        <h3 className="text-gray-500 text-sm font-semibold uppercase tracking-wide">System Health</h3>
+                                        <motion.div
+                                            animate={{ scale: [1, 1.2, 1] }}
+                                            transition={{ duration: 1.5, repeat: Infinity }}
+                                        >
+                                            <Activity className="w-6 h-6 text-green-500" />
+                                        </motion.div>
                                     </div>
-                                    <p className="text-3xl font-bold text-green-600">{isLoading ? '...' : `${Math.round((onlineCount / totalTanks) * 100)}%`}</p>
-                                    <p className="text-xs text-gray-400 mt-1">Operational status</p>
+                                    <p className="text-4xl font-black text-green-600 mb-1">{isLoading ? '...' : `${Math.round((onlineCount / totalTanks) * 100)}%`}</p>
+                                    <p className="text-xs text-gray-500 font-medium">Operational status</p>
                                 </motion.div>
                             </div>
 
@@ -847,6 +973,28 @@ const AdminDashboard = () => {
                                 </div>
                             </div>
                         </div>
+                    )}
+
+                    {/* Telemetry Logs Tab */}
+                    {activeTab === 'telemetry' && (
+                        <TelemetryLogs userRole="admin" />
+                    )}
+
+                    {/* AI Vision Tab */}
+                    {activeTab === 'vision' && (
+                        <div className="card-premium p-8">
+                            <VisionInspection userRole="admin" />
+                        </div>
+                    )}
+
+                    {/* Contact Messages Tab */}
+                    {activeTab === 'messages' && (
+                        <ContactMessages />
+                    )}
+
+                    {/* Newsletter Subscribers Tab */}
+                    {activeTab === 'subscribers' && (
+                        <NewsletterSubscribers />
                     )}
                 </div>
             </main>

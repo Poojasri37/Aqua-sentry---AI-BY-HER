@@ -102,26 +102,36 @@ const UserNotifications = () => {
                                             </button>
 
                                             <div className="flex items-start gap-3 pr-6">
-                                                <div className={`p-2 rounded-xl ${notification.type === 'request_approved'
-                                                        ? 'bg-emerald-50'
+                                                <div className={`p-2 rounded-xl ${notification.type === 'request_approved' || notification.type === 'issue_resolved'
+                                                    ? 'bg-emerald-50'
+                                                    : notification.type === 'maintenance_scheduled'
+                                                        ? 'bg-blue-50'
                                                         : 'bg-red-50'
                                                     }`}>
-                                                    {notification.type === 'request_approved' ? (
+                                                    {notification.type === 'request_approved' || notification.type === 'issue_resolved' ? (
                                                         <CheckCircle className="w-4 h-4 text-emerald-600" />
+                                                    ) : notification.type === 'maintenance_scheduled' ? (
+                                                        <Bell className="w-4 h-4 text-blue-600" />
                                                     ) : (
                                                         <XCircle className="w-4 h-4 text-red-600" />
                                                     )}
                                                 </div>
                                                 <div className="flex-1">
-                                                    <h4 className={`font-black text-sm mb-1 ${notification.type === 'request_approved'
-                                                            ? 'text-emerald-900'
+                                                    <h4 className={`font-black text-sm mb-1 ${notification.type === 'request_approved' || notification.type === 'issue_resolved'
+                                                        ? 'text-emerald-900'
+                                                        : notification.type === 'maintenance_scheduled'
+                                                            ? 'text-blue-900'
                                                             : 'text-red-900'
                                                         }`}>
                                                         {notification.type === 'request_approved'
-                                                            ? 'Request Approved ✓'
-                                                            : 'Request Rejected'}
+                                                            ? 'Asset Approved ✓'
+                                                            : notification.type === 'issue_resolved'
+                                                                ? 'Issue Resolved ✓'
+                                                                : notification.type === 'maintenance_scheduled'
+                                                                    ? 'Maintenance Scheduled'
+                                                                    : 'Update Pending'}
                                                     </h4>
-                                                    <p className="text-xs text-slate-600 font-medium mb-2">
+                                                    <p className="text-xs text-slate-600 font-medium mb-2 leading-relaxed">
                                                         {notification.message}
                                                     </p>
                                                     <span className="text-[10px] text-slate-400 font-bold uppercase">

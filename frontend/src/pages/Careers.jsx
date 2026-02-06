@@ -66,7 +66,7 @@ const Careers = () => {
                     </div>
                     <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-lg text-center">
                         <h3 className="text-xl font-bold mb-2">Innovation</h3>
-                        <p className="text-gray-600">Work with cutting-edge AI and IoT technology</p>
+                        <p className="text-gray-600">Work with cutting-edge technology</p>
                     </div>
                     <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-lg text-center">
                         <h3 className="text-xl font-bold mb-2">Impact</h3>

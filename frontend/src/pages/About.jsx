@@ -24,7 +24,7 @@ const About = () => {
                         transition={{ delay: 0.1 }}
                         className="text-xl text-gray-600 max-w-3xl mx-auto"
                     >
-                        Advanced water tank monitoring system designed to revolutionize water management through AI-driven recommendations, real-time alerts, and IoT integration.
+                        Advanced water tank monitoring system designed to revolutionize water management through intelligent recommendations, real-time alerts, and smart integration.
                     </motion.p>
                 </div>
 
@@ -40,7 +40,7 @@ const About = () => {
                             Water is life, yet its management remains one of the greatest challenges of our time. At AquaSentry, we are committed to solving this through technology.
                         </p>
                         <p className="text-gray-600 text-lg leading-relaxed">
-                            Our platform empowers communities and businesses by providing real-time visibility into their water infrastructure, ensuring safety, sustainability, and operational efficiency using cutting-edge AI and IoT solutions.
+                            Our platform empowers communities and businesses by providing real-time visibility into their water infrastructure, ensuring safety, sustainability, and operational efficiency using cutting-edge technology solutions.
                         </p>
                     </motion.div>
                     <motion.div

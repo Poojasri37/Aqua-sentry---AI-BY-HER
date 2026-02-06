@@ -78,7 +78,7 @@ const ForgotPassword = ({ isOpen, onClose }) => {
                     className="w-full max-w-md bg-white border border-gray-200 rounded-[2rem] shadow-2xl overflow-hidden relative"
                 >
                     {/* Top Accent Line */}
-                    <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-gov-green-600 via-gov-blue-600 to-gov-green-800" />
+                    <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-gov-blue-600 via-indigo-600 to-gov-blue-800" />
 
                     <button
                         onClick={onClose}
@@ -90,9 +90,9 @@ const ForgotPassword = ({ isOpen, onClose }) => {
                     <div className="p-10">
                         <div className="mb-10 text-center">
                             <div className="w-16 h-16 bg-gray-50 border border-gray-200 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-sm">
-                                {step === 1 && <Mail className="w-8 h-8 text-gov-green-700" />}
-                                {step === 2 && <ShieldAlert className="w-8 h-8 text-gov-blue-700 animate-pulse" />}
-                                {step === 3 && <Fingerprint className="w-8 h-8 text-gov-green-800" />}
+                                {step === 1 && <Mail className="w-8 h-8 text-gov-blue-700" />}
+                                {step === 2 && <ShieldAlert className="w-8 h-8 text-indigo-700 animate-pulse" />}
+                                {step === 3 && <Fingerprint className="w-8 h-8 text-gov-blue-800" />}
                             </div>
                             <h3 className="text-2xl font-bold text-gray-900 mb-2 tracking-tight">
                                 {step === 1 && 'Recover Access'}
@@ -110,20 +110,20 @@ const ForgotPassword = ({ isOpen, onClose }) => {
                             <form onSubmit={handleEmailSubmit} className="space-y-6">
                                 <div className="space-y-2">
                                     <div className="relative group">
-                                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-gov-green-600" />
+                                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-gov-blue-700" />
                                         <input
                                             type="email"
                                             value={email}
                                             onChange={(e) => setEmail(e.target.value)}
                                             required
-                                            className="w-full bg-gray-50 border border-gray-300 rounded-xl py-4 pl-12 pr-4 text-gray-900 focus:outline-none focus:ring-2 focus:ring-gov-green-50 focus:border-gov-green-600 transition-all font-medium"
+                                            className="w-full bg-gray-50 border border-gray-300 rounded-xl py-4 pl-12 pr-4 text-gray-900 focus:outline-none focus:ring-2 focus:ring-gov-blue-50 focus:border-gov-blue-700 transition-all font-medium"
                                             placeholder="identity@gov.in"
                                         />
                                     </div>
                                 </div>
                                 <button
                                     type="submit"
-                                    className="w-full bg-gov-green-700 text-white font-bold py-4 rounded-xl hover:bg-gov-green-800 hover:shadow-lg transition-all flex items-center justify-center gap-2 group"
+                                    className="w-full bg-gov-blue-700 text-white font-bold py-4 rounded-xl hover:bg-gov-blue-800 hover:shadow-lg transition-all flex items-center justify-center gap-2 group"
                                 >
                                     {isLoading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <>Request Secure Code <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" /></>}
                                 </button>
@@ -155,7 +155,7 @@ const ForgotPassword = ({ isOpen, onClose }) => {
                                 <button
                                     type="button"
                                     onClick={() => setStep(1)}
-                                    className="w-full text-sm font-bold text-center text-gray-500 hover:text-gov-green-700 transition-colors uppercase tracking-widest"
+                                    className="w-full text-sm font-bold text-center text-gray-500 hover:text-gov-blue-700 transition-colors uppercase tracking-widest"
                                 >
                                     Re-send Uplink
                                 </button>
@@ -166,31 +166,31 @@ const ForgotPassword = ({ isOpen, onClose }) => {
                             <form onSubmit={handlePasswordSubmit} className="space-y-6">
                                 <div className="space-y-4">
                                     <div className="relative group">
-                                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-gov-green-600" />
+                                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-gov-blue-700" />
                                         <input
                                             type="password"
                                             value={newPassword}
                                             onChange={(e) => setNewPassword(e.target.value)}
                                             required
-                                            className="w-full bg-gray-50 border border-gray-300 rounded-xl py-4 pl-12 pr-4 text-gray-900 focus:outline-none focus:ring-2 focus:ring-gov-green-50 focus:border-gov-green-600 transition-all font-medium"
+                                            className="w-full bg-gray-50 border border-gray-300 rounded-xl py-4 pl-12 pr-4 text-gray-900 focus:outline-none focus:ring-2 focus:ring-gov-blue-50 focus:border-gov-blue-700 transition-all font-medium"
                                             placeholder="New Security Passcode"
                                         />
                                     </div>
                                     <div className="relative group">
-                                        <Key className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-gov-green-600" />
+                                        <Key className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-gov-blue-700" />
                                         <input
                                             type="password"
                                             value={confirmPassword}
                                             onChange={(e) => setConfirmPassword(e.target.value)}
                                             required
-                                            className="w-full bg-gray-50 border border-gray-300 rounded-xl py-4 pl-12 pr-4 text-gray-900 focus:outline-none focus:ring-2 focus:ring-gov-green-50 focus:border-gov-green-600 transition-all font-medium"
+                                            className="w-full bg-gray-50 border border-gray-300 rounded-xl py-4 pl-12 pr-4 text-gray-900 focus:outline-none focus:ring-2 focus:ring-gov-blue-50 focus:border-gov-blue-700 transition-all font-medium"
                                             placeholder="Confirm Passcode"
                                         />
                                     </div>
                                 </div>
                                 <button
                                     type="submit"
-                                    className="w-full bg-gov-green-700 text-white font-bold py-4 rounded-xl hover:bg-gov-green-800 shadow-lg transition-all flex items-center justify-center gap-2"
+                                    className="w-full bg-gov-blue-700 text-white font-bold py-4 rounded-xl hover:bg-gov-blue-800 shadow-lg transition-all flex items-center justify-center gap-2"
                                 >
                                     {isLoading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <>Commit Vault Reset <CheckCircle className="w-5 h-5" /></>}
                                 </button>

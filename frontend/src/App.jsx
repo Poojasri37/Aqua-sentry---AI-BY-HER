@@ -20,6 +20,7 @@ import Features from './components/landing/Features';
 import DemoSection from './components/landing/DemoSection';
 import Footer from './components/landing/Footer';
 import Login from './pages/Login';
+import Signup from './pages/Signup';
 import About from './pages/About';
 import Contact from './pages/Contact';
 import FeaturesPage from './pages/FeaturesPage';
@@ -52,7 +53,7 @@ function App() {
           <ScrollToTop />
           <Routes>
             <Route path="/" element={
-              <div className="min-h-screen bg-gray-50 text-gray-900">
+              <div className="min-h-screen mesh-gradient animate-gradient-flow text-gray-900 selection:bg-blue-100 relative">
                 <Navbar />
                 <Hero />
                 <ProjectOverview />
@@ -62,6 +63,7 @@ function App() {
               </div>
             } />
             <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/features" element={<FeaturesPage />} />

@@ -13,13 +13,13 @@ const features = [
         icon: <Brain className="w-6 h-6" />,
         title: "AI Recommendations",
         description: "Get actionable insights and automated treatment suggestions powered by ML models.",
-        color: "bg-gov-green-50 text-gov-green-600 border-gov-green-200"
+        color: "bg-gov-blue-50 text-indigo-700 border-indigo-200"
     },
     {
         icon: <Eye className="w-6 h-6" />,
         title: "Vision Analysis",
         description: "Upload images to detect contamination, rust, or structural damage instantly.",
-        color: "bg-orange-50 text-orange-600 border-orange-200"
+        color: "bg-blue-50 text-blue-600 border-blue-200"
     },
     {
         icon: <Map className="w-6 h-6" />,
@@ -31,28 +31,28 @@ const features = [
         icon: <Wrench className="w-6 h-6" />,
         title: "Predictive Maintenance",
         description: "Forecast equipment failures before they happen to prevent downtime.",
-        color: "bg-gov-green-100 text-gov-green-800 border-gov-green-300"
+        color: "bg-gov-blue-100 text-gov-blue-900 border-gov-blue-400"
     },
     {
         icon: <Droplets className="w-6 h-6" />,
         title: "Demand Forecasting",
         description: "Predict future water usage trends to optimize distribution and storage.",
-        color: "bg-orange-100 text-orange-800 border-orange-300"
+        color: "bg-sky-50 text-sky-700 border-sky-200"
     }
 ];
 
 const Features = () => {
     return (
-        <section id="features" className="py-24 bg-white relative overflow-hidden">
+        <section id="features" className="py-24 relative overflow-hidden">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="text-center mb-16">
                     <motion.h2
-                        className="text-3xl md:text-5xl font-bold mb-4 text-gray-900"
+                        className="text-4xl md:text-5xl font-black mb-4 text-gray-950 tracking-tight"
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                     >
-                        Advanced <span className="text-gov-green-700">Capabilities</span>
+                        Advanced <span className="bg-clip-text text-transparent bg-gradient-to-r from-gov-blue-700 to-indigo-800">Capabilities</span>
                     </motion.h2>
                     <motion.p
                         className="text-gray-600 max-w-2xl mx-auto"
@@ -69,7 +69,7 @@ const Features = () => {
                     {features.map((feature, index) => (
                         <motion.div
                             key={index}
-                            className="group p-8 rounded-2xl bg-gray-50 border border-gray-200 hover:bg-white hover:shadow-xl hover:border-gov-green-200 transition-all duration-300"
+                            className="group p-8 rounded-2xl bg-white/50 backdrop-blur-sm border border-gray-100 hover:bg-white hover:shadow-2xl hover:shadow-blue-200/40 hover:border-blue-300 transition-all duration-300"
                             initial={{ opacity: 0, y: 20 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
@@ -87,7 +87,7 @@ const Features = () => {
                                 {feature.description}
                             </p>
 
-                            <div className="flex items-center text-sm font-semibold text-gov-green-700">
+                            <div className="flex items-center text-sm font-bold text-blue-600 group-hover:text-blue-800 transition-colors">
                                 Learn more <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                             </div>
                         </motion.div>

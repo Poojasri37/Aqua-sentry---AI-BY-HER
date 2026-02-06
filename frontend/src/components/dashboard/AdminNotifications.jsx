@@ -32,24 +32,57 @@ const AdminNotifications = () => {
         return () => clearInterval(interval);
     }, []);
 
+    const handleAction = (notification, index) => {
+        // 1. Determine specific storage key
+        const storageKey = notification.type === 'asset' ? 'adminNotifications' :
+            notification.type === 'issue' ? 'issueNotifications' :
+                'maintenanceNotifications';
+
+        // 2. Remove from Admin storage
+        const stored = JSON.parse(localStorage.getItem(storageKey) || '[]');
+        const filtered = stored.filter((n, i) => {
+            return n.timestamp !== notification.timestamp;
+        });
+        localStorage.setItem(storageKey, JSON.stringify(filtered));
+
+        // 3. Notify User
+        const userNotifications = JSON.parse(localStorage.getItem('userNotifications') || '[]');
+        let userMsg = '';
+        let actionType = 'request_approved';
+
+        if (notification.type === 'asset') {
+            userMsg = `Your registration for asset "${notification.assetDetails?.name}" has been approved.`;
+            actionType = 'request_approved';
+        } else if (notification.type === 'issue') {
+            userMsg = `Maintenance dispatch confirmed for "${notification.issueDetails?.tankName}". Issue is being resolved.`;
+            actionType = 'issue_resolved';
+        } else {
+            userMsg = `Your maintenance request from ${new Date(notification.timestamp).toLocaleDateString()} has been scheduled.`;
+            actionType = 'maintenance_scheduled';
+        }
+
+        userNotifications.unshift({
+            type: actionType,
+            message: userMsg,
+            timestamp: new Date().toISOString()
+        });
+        localStorage.setItem('userNotifications', JSON.stringify(userNotifications));
+
+        // 4. Update local state
+        setNotifications(prev => prev.filter(n => n.timestamp !== notification.timestamp));
+
+        // Show a brief alert/feedback if needed (optional since we're updating UI)
+    };
+
     const handleDismiss = (notification, index) => {
-        // Remove from appropriate localStorage
         const storageKey = notification.type === 'asset' ? 'adminNotifications' :
             notification.type === 'issue' ? 'issueNotifications' :
                 'maintenanceNotifications';
 
         const stored = JSON.parse(localStorage.getItem(storageKey) || '[]');
-        const filtered = stored.filter((_, i) => {
-            // Find the actual index in the specific storage
-            const actualIndex = stored.findIndex(n =>
-                n.timestamp === notification.timestamp &&
-                JSON.stringify(n) === JSON.stringify(notifications.filter(n => n.type === notification.type)[i])
-            );
-            return i !== actualIndex;
-        });
+        const filtered = stored.filter(n => n.timestamp !== notification.timestamp);
         localStorage.setItem(storageKey, JSON.stringify(filtered));
 
-        // Update local state
         setNotifications(notifications.filter((_, i) => i !== index));
     };
 
@@ -147,8 +180,8 @@ const AdminNotifications = () => {
                                         key={tab.id}
                                         onClick={() => setFilter(tab.id)}
                                         className={`flex-1 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${filter === tab.id
-                                                ? 'bg-slate-900 text-white'
-                                                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                                            ? 'bg-slate-900 text-white'
+                                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                                             }`}
                                     >
                                         {tab.label} {tab.count > 0 && `(${tab.count})`}
@@ -254,7 +287,10 @@ const AdminNotifications = () => {
                                                             {new Date(notification.timestamp).toLocaleString()}
                                                         </span>
                                                         <div className="flex gap-2">
-                                                            <button className="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-lg text-[10px] font-bold hover:bg-emerald-100 transition-colors">
+                                                            <button
+                                                                onClick={() => handleAction(notification, index)}
+                                                                className="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-lg text-[10px] font-bold hover:bg-emerald-100 transition-colors"
+                                                            >
                                                                 {notification.type === 'asset' ? 'Approve' :
                                                                     notification.type === 'issue' ? 'Dispatch' : 'Schedule'}
                                                             </button>

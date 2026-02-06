@@ -24,7 +24,9 @@ import {
     MoreVertical,
     FileJson,
     Minimize2,
-    Maximize2
+    Maximize2,
+    Eye,
+    Radio
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -39,6 +41,8 @@ import L from 'leaflet';
 import UserTankMap from '../../components/dashboard/UserTankMap';
 import RegisterAssetModal from '../../components/dashboard/RegisterAssetModal';
 import UserNotifications from '../../components/dashboard/UserNotifications';
+import VisionInspection from '../../components/dashboard/VisionInspection';
+import TelemetryLogs from '../../components/dashboard/TelemetryLogs';
 import { useSocket } from '../../context/SocketContext';
 
 // Fix Leaflet icon issue
@@ -197,6 +201,8 @@ const UserDashboard = () => {
         { id: 'ai', label: 'AI Insights', icon: BrainCircuit },
         { id: 'report', label: 'Contamination', icon: AlertTriangle },
         { id: 'maintenance', label: 'Maintenance', icon: Wrench },
+        { id: 'vision', label: 'AI Vision', icon: Eye },
+        { id: 'telemetry', label: 'Telemetry', icon: Radio },
         { id: 'logs', label: 'System Logs', icon: FileText },
     ];
 
@@ -625,7 +631,23 @@ const UserDashboard = () => {
                                             <p className="text-sm text-slate-500 font-medium">Coordinate with system administrators for regional asset upkeep.</p>
                                         </div>
                                         <button
-                                            onClick={() => alert('Admin notification sent. A technician will be scheduled for your region.')}
+                                            onClick={() => {
+                                                const maintenanceNotice = {
+                                                    type: 'maintenance',
+                                                    user: user?.name || 'Registered User',
+                                                    email: user?.email || 'N/A',
+                                                    maintenanceDetails: {
+                                                        type: 'System Overhaul Request',
+                                                        region: region,
+                                                        priority: 'high'
+                                                    },
+                                                    timestamp: new Date().toISOString()
+                                                };
+                                                const existing = JSON.parse(localStorage.getItem('maintenanceNotifications') || '[]');
+                                                existing.push(maintenanceNotice);
+                                                localStorage.setItem('maintenanceNotifications', JSON.stringify(existing));
+                                                alert('Regional maintenance request has been broadcasted to the Command Center.');
+                                            }}
                                             className="px-8 py-3 bg-cyan-600 text-white rounded-xl font-black hover:shadow-lg transition-all flex items-center gap-2"
                                         >
                                             <Wrench className="w-5 h-5" /> Request Maintenance Overhaul
@@ -663,6 +685,43 @@ const UserDashboard = () => {
                                                 ))}
                                             </tbody>
                                         </table>
+                                    </div>
+
+                                    {/* Recent Resolutions Section */}
+                                    <div className="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm mt-8">
+                                        <div className="flex items-center justify-between mb-8">
+                                            <div className="flex items-center gap-3">
+                                                <div className="p-3 bg-emerald-50 rounded-2xl text-emerald-600"><CheckCircle2 className="w-5 h-5" /></div>
+                                                <h4 className="font-black text-slate-900 uppercase tracking-widest text-sm">Resolved Support Tickets</h4>
+                                            </div>
+                                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Admin Verified</span>
+                                        </div>
+
+                                        <div className="space-y-4">
+                                            {JSON.parse(localStorage.getItem('userNotifications') || '[]')
+                                                .filter(n => n.type === 'issue_resolved')
+                                                .slice(0, 5)
+                                                .map((resolution, idx) => (
+                                                    <div key={idx} className="flex items-center gap-4 p-5 bg-slate-50 rounded-2xl border border-slate-100 group hover:bg-white hover:border-emerald-200 transition-all">
+                                                        <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm text-emerald-500 group-hover:bg-emerald-500 group-hover:text-white transition-all">
+                                                            <CheckCircle2 className="w-5 h-5" />
+                                                        </div>
+                                                        <div className="flex-1">
+                                                            <p className="text-sm font-black text-slate-900 mb-1">{resolution.message}</p>
+                                                            <p className="text-[10px] font-bold text-slate-400 uppercase">{new Date(resolution.timestamp).toLocaleString()}</p>
+                                                        </div>
+                                                        <div className="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-lg text-[9px] font-black uppercase tracking-widest">
+                                                            RESOLVED
+                                                        </div>
+                                                    </div>
+                                                ))}
+
+                                            {JSON.parse(localStorage.getItem('userNotifications') || '[]').filter(n => n.type === 'issue_resolved').length === 0 && (
+                                                <div className="p-10 text-center border-2 border-dashed border-slate-100 rounded-3xl">
+                                                    <p className="text-xs font-bold text-slate-400 italic">No recently resolved issues to display.</p>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             )}
@@ -851,6 +910,16 @@ const UserDashboard = () => {
                                         </div>
                                     </div>
                                 </div>
+                            )}
+
+                            {activeTab === 'vision' && (
+                                <div className="card-premium p-8">
+                                    <VisionInspection userRole="user" />
+                                </div>
+                            )}
+
+                            {activeTab === 'telemetry' && (
+                                <TelemetryLogs userRole="user" userWards={tanks} />
                             )}
                         </motion.div>
                     </AnimatePresence>

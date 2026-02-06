@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
     Mail,
     Lock,
@@ -9,23 +9,23 @@ import {
     ArrowLeft,
     ArrowRight,
     Droplets,
-    UserCircle2
+    UserCircle2,
+    User
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import ForgotPassword from '../components/auth/ForgotPassword';
 import { useAuth } from '../context/AuthContext';
 
-const Login = () => {
-    const [role, setRole] = useState('user'); // 'user' maps to business_partner internally
+const Signup = () => {
+    const [role, setRole] = useState('user');
     const [showPassword, setShowPassword] = useState(false);
-    const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
+    const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
     const navigate = useNavigate();
-    const { login, isAuthenticated, user } = useAuth();
+    const { register, isAuthenticated, user } = useAuth();
 
     useEffect(() => {
         if (isAuthenticated && user) {
@@ -40,12 +40,13 @@ const Login = () => {
         setIsLoading(true);
 
         try {
-            const result = await login(email, password);
+            const roleToSubmit = role === 'user' ? 'business_partner' : role;
+            const result = await register(name, email, password, roleToSubmit);
             if (result.success) {
                 const userRole = result.user.role;
                 navigate(userRole === 'admin' ? '/admin/dashboard' : '/user/dashboard');
             } else {
-                setError(result.error || 'Invalid credentials. Please verify your identity.');
+                setError(result.error || 'Registration failed. Please check your details.');
             }
         } catch (err) {
             setError('Connection to security server failed. Please try again.');
@@ -55,7 +56,7 @@ const Login = () => {
     };
 
     return (
-        <div className="min-h-screen relative flex items-center justify-center overflow-hidden mesh-gradient animate-gradient-flow px-4 font-sans">
+        <div className="min-h-screen relative flex items-center justify-center overflow-hidden mesh-gradient animate-gradient-flow px-4 font-sans py-12">
             {/* Soft Background Accents */}
             <div className="absolute inset-0 z-0 opacity-40">
                 <div className="absolute top-[-10%] right-[-10%] w-[600px] h-[600px] bg-gov-blue-100 rounded-full blur-[120px]" />
@@ -81,10 +82,12 @@ const Login = () => {
                 {/* Brand Header */}
                 <div className="text-center mb-10 flex flex-col items-center">
                     <div className="w-16 h-16 bg-gradient-to-br from-gov-blue-700 to-gov-blue-900 rounded-2xl flex items-center justify-center shadow-lg mb-6">
-                        <Droplets className="w-8 h-8 text-white" />
+                        <div className="animate-bounce">
+                            <Droplets className="w-8 h-8 text-white" />
+                        </div>
                     </div>
                     <h1 className="text-3xl font-black text-gray-950 tracking-tight mb-2">
-                        AquaSentry <span className="bg-clip-text text-transparent bg-gradient-to-r from-gov-blue-700 to-indigo-800">Login</span>
+                        AquaSentry <span className="bg-clip-text text-transparent bg-gradient-to-r from-gov-blue-700 to-indigo-800">Account Registration</span>
                     </h1>
                     <p className="text-gray-600 font-bold uppercase tracking-widest text-[10px]">Official Secure Access Gateway</p>
                 </div>
@@ -103,63 +106,45 @@ const Login = () => {
                         </motion.div>
                     )}
 
-                    {/* Role Selector - Gov Style */}
-                    <div className="flex gap-4 p-1.5 bg-gray-100 rounded-xl mb-10">
-                        <button
-                            onClick={() => setRole('user')}
-                            className={`flex-1 flex items-center justify-center gap-3 py-3.5 rounded-lg text-sm font-bold transition-all relative ${role === 'user' ? 'text-white' : 'text-gray-500 hover:text-gray-700'
-                                }`}
-                        >
-                            {role === 'user' && (
-                                <motion.div layoutId="role-bg-light" className="absolute inset-0 bg-gov-blue-700 rounded-lg shadow-md -z-0" />
-                            )}
-                            <span className="relative z-10 flex items-center gap-2">
-                                <UserCircle2 className="w-4 h-4" /> User
-                            </span>
-                        </button>
-                        <button
-                            onClick={() => setRole('admin')}
-                            className={`flex-1 flex items-center justify-center gap-3 py-3.5 rounded-lg text-sm font-bold transition-all relative ${role === 'admin' ? 'text-white' : 'text-gray-500 hover:text-gray-700'
-                                }`}
-                        >
-                            {role === 'admin' && (
-                                <motion.div layoutId="role-bg-light" className="absolute inset-0 bg-gov-blue-700 rounded-lg shadow-md -z-0" />
-                            )}
-                            <span className="relative z-10 flex items-center gap-2">
-                                <ShieldCheck className="w-4 h-4" /> Admin
-                            </span>
-                        </button>
-                    </div>
+
 
                     <form onSubmit={handleSubmit} className="space-y-6">
+                        <div className="space-y-2">
+                            <label className="text-sm font-bold text-gray-700 flex items-center gap-2">
+                                Full Name
+                            </label>
+                            <div className="relative group">
+                                <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-gov-blue-700 transition-colors" />
+                                <input
+                                    type="text"
+                                    required
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
+                                    className="block w-full bg-gray-50 border border-gray-300 rounded-xl py-4 pl-12 pr-4 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gov-blue-100 focus:border-gov-blue-700 transition-all font-medium"
+                                    placeholder="Enter your full name"
+                                />
+                            </div>
+                        </div>
+
                         <div className="space-y-2">
                             <label className="text-sm font-bold text-gray-700 flex items-center gap-2">
                                 Identity Clearance (Email)
                             </label>
                             <div className="relative group">
-                                <UserCircle2 className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-gov-blue-700 transition-colors" />
+                                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-gov-blue-700 transition-colors" />
                                 <input
                                     type="email"
                                     required
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     className="block w-full bg-gray-50 border border-gray-300 rounded-xl py-4 pl-12 pr-4 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gov-blue-100 focus:border-gov-blue-700 transition-all font-medium"
-                                    placeholder={role === 'admin' ? "admin@gov.in" : "user@portal.com"}
+                                    placeholder="user@portal.com"
                                 />
                             </div>
                         </div>
 
                         <div className="space-y-2">
-                            <div className="flex justify-between items-center">
-                                <label className="text-sm font-bold text-gray-700">Security Passcode</label>
-                                <button
-                                    type="button"
-                                    onClick={() => setIsForgotPasswordOpen(true)}
-                                    className="text-xs text-gov-blue-700 hover:text-gov-blue-900 font-bold underline"
-                                >
-                                    Forgot Passcode?
-                                </button>
-                            </div>
+                            <label className="text-sm font-bold text-gray-700">Security Passcode</label>
                             <div className="relative group">
                                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-gov-blue-700 transition-colors" />
                                 <input
@@ -188,24 +173,19 @@ const Login = () => {
                             {isLoading ? (
                                 <div className="w-6 h-6 border-4 border-white/30 border-t-white rounded-full animate-spin" />
                             ) : (
-                                <>Authenticate Access <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" /></>
+                                <>Create Secure Account <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" /></>
                             )}
                         </button>
                     </form>
 
-                    {role !== 'admin' && (
-                        <div className="mt-10 pt-8 border-t border-gray-100 text-center">
-                            <p className="text-gray-500 text-sm font-medium">
-                                Don't have an account?{' '}
-                                <Link to="/signup" className="text-gov-blue-700 hover:text-gov-blue-900 font-bold">
-                                    Sign up here
-                                </Link>
-                            </p>
-                            <p className="mt-2 text-xs text-gray-400">
-                                Need higher clearance? <Link to="/contact" className="underline hover:text-gray-600">Contact System Admin</Link>
-                            </p>
-                        </div>
-                    )}
+                    <div className="mt-10 pt-8 border-t border-gray-100 text-center">
+                        <p className="text-gray-500 text-sm font-medium">
+                            Already have an account?{' '}
+                            <Link to="/login" className="text-gov-blue-700 hover:text-gov-blue-900 font-bold">
+                                Log in here
+                            </Link>
+                        </p>
+                    </div>
                 </div>
 
                 <div className="mt-10 text-center opacity-70">
@@ -214,13 +194,8 @@ const Login = () => {
                     </p>
                 </div>
             </motion.div>
-
-            <ForgotPassword
-                isOpen={isForgotPasswordOpen}
-                onClose={() => setIsForgotPasswordOpen(false)}
-            />
         </div>
     );
 };
 
-export default Login;
+export default Signup;

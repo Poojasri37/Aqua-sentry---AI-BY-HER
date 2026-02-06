@@ -105,7 +105,7 @@ const FeaturesPage = () => {
                         transition={{ delay: 0.1 }}
                         className="text-xl text-gray-600 max-w-3xl mx-auto"
                     >
-                        Comprehensive water management capabilities powered by AI and IoT technology
+                        Comprehensive water management capabilities for modern municipalities
                     </motion.p>
                 </div>
 
