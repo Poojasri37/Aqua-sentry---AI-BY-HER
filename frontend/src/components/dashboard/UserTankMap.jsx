@@ -34,22 +34,23 @@ const createStatusIcon = (status) => {
 const UserTankMap = ({ tanks }) => {
     const navigate = useNavigate();
 
-    // Filter only Salem tanks for user dashboard
-    const salemTanks = tanks.filter(tank => tank.region === 'Salem' || tank.id?.startsWith('TN-SA-'));
+    // Determine current region based on tanks
+    const hasCoimbatore = tanks.some(t => t.location?.address?.includes('Coimbatore') || t.location?.address?.includes('Peelamedu'));
 
-    // Center on Salem
-    const center = [11.6643, 78.1460];
+    // Center on Avinashi Road, Peelamedu if Coimbatore tanks exist
+    const center = hasCoimbatore ? [11.0250, 77.0120] : [11.6643, 78.1460];
+    const zoom = hasCoimbatore ? 14 : 13;
 
     return (
         <div className="w-full h-full rounded-xl overflow-hidden border border-gray-200 shadow-md relative z-0">
-            <MapContainer center={center} zoom={13} style={{ height: '100%', width: '100%' }}>
+            <MapContainer center={center} zoom={zoom} style={{ height: '100%', width: '100%' }}>
                 <TileLayer
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
 
-                {/* Tank Markers - Only Salem */}
-                {salemTanks.map((tank) => (
+                {/* Tank Markers */}
+                {tanks.map((tank) => (
                     <Marker
                         key={tank.id}
                         position={[tank.location.lat, tank.location.lng]}
@@ -60,8 +61,8 @@ const UserTankMap = ({ tanks }) => {
                                 <h3 className="font-bold text-gray-900 mb-2">{tank.name}</h3>
                                 <div className="flex items-center gap-2 mb-3">
                                     <span className={`w-3 h-3 rounded-full ${tank.status === 'online' ? 'bg-green-500' :
-                                            tank.status === 'warning' ? 'bg-yellow-500' :
-                                                tank.status === 'critical' ? 'bg-red-500' : 'bg-gray-500'
+                                        tank.status === 'warning' ? 'bg-yellow-500' :
+                                            tank.status === 'critical' ? 'bg-red-500' : 'bg-gray-500'
                                         }`} />
                                     <span className="text-sm capitalize text-gray-600 font-medium">{tank.status}</span>
                                 </div>

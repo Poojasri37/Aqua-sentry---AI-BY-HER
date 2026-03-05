@@ -1,285 +1,387 @@
-import React, { useState, useRef } from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useRef, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
-    Camera, Upload, Eye, AlertTriangle, CheckCircle, XCircle,
-    Loader, Download, Trash2, Image as ImageIcon
+    Camera, Upload, Radio, Activity, AlertTriangle, CheckCircle,
+    XCircle, Scan, Zap, Droplets, Target, Shield, RefreshCw
 } from 'lucide-react';
 
-const VisionInspection = ({ userRole = 'admin' }) => {
+const VisionInspection = () => {
     const [selectedImage, setSelectedImage] = useState(null);
-    const [imagePreview, setImagePreview] = useState(null);
     const [analyzing, setAnalyzing] = useState(false);
+    const [scanProgress, setScanProgress] = useState(0);
     const [results, setResults] = useState(null);
+    const [scanStep, setScanStep] = useState('');
+
     const fileInputRef = useRef(null);
     const cameraInputRef = useRef(null);
+    const canvasRef = useRef(null);
 
-    const handleFileSelect = (event) => {
-        const file = event.target.files[0];
+    // 🎨 Logic: Analyze Image Color
+    const analyzeImageColor = (imageSrc) => {
+        const img = new Image();
+        img.src = imageSrc;
+        img.onload = () => {
+            const canvas = canvasRef.current;
+            const ctx = canvas.getContext('2d');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img, 0, 0, img.width, img.height);
+
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const data = imageData.data;
+            let r = 0, g = 0, b = 0;
+
+            // Sample every 10th pixel for performance
+            let count = 0;
+            for (let i = 0; i < data.length; i += 40) {
+                r += data[i];
+                g += data[i + 1];
+                b += data[i + 2];
+                count++;
+            }
+
+            r = Math.floor(r / count);
+            g = Math.floor(g / count);
+            b = Math.floor(b / count);
+
+            generateDiagnosis(r, g, b);
+        };
+    };
+
+    // 🧠 Logic: Generate AI Diagnosis
+    const generateDiagnosis = (r, g, b) => {
+        let diagnosis = {
+            status: 'Clean',
+            color: 'text-green-500',
+            bg: 'bg-green-500/10',
+            border: 'border-green-500/50',
+            icon: CheckCircle,
+            message: 'Water appears clear and safe.',
+            metrics: { turbidity: 1.2, ph: 7.4, bio: 2 },
+            issues: []
+        };
+
+        // Calculate brightness and saturation helpers
+        const brightness = (r + g + b) / 3;
+        const max = Math.max(r, g, b);
+        const min = Math.min(r, g, b);
+        const saturation = max === 0 ? 0 : (max - min) / max;
+
+        // 🟤 1. Rust / Mud / Turbid (Red or Brown dominant)
+        // Brown is often Red + Green, or just Red dominant.
+        if ((r > b + 30 && r > g + 10) || (r > 100 && g > 80 && b < 80)) {
+            diagnosis = {
+                status: 'Critical',
+                color: 'text-amber-600',
+                bg: 'bg-amber-600/10',
+                border: 'border-amber-600/50',
+                icon: XCircle,
+                message: 'Heavy sedimentation or rust detected.',
+                metrics: { turbidity: 120, ph: 6.1, bio: 45 },
+                issues: ['Iron Oxidation (Rust)', 'High Turbidity', 'Suspended Solids']
+            };
+        }
+        // 🟢 2. Algae (Green dominant)
+        else if (g > r + 15 && g > b + 15) {
+            diagnosis = {
+                status: 'Contaminated',
+                color: 'text-emerald-500',
+                bg: 'bg-emerald-500/10',
+                border: 'border-emerald-500/50',
+                icon: AlertTriangle,
+                message: 'Significant algal bloom detected.',
+                metrics: { turbidity: 85, ph: 8.5, bio: 92 },
+                issues: ['High Algae Content', 'Organic Contamination', 'Possible Eutrophication']
+            };
+        }
+        // ⚫ 3. Dark / Hazardous (Low Brightness)
+        else if (brightness < 70) {
+            diagnosis = {
+                status: 'Hazardous',
+                color: 'text-purple-500',
+                bg: 'bg-purple-500/10',
+                border: 'border-purple-500/50',
+                icon: Activity,
+                message: 'Unknown dark contaminants detected.',
+                metrics: { turbidity: 95, ph: 5.5, bio: 78 },
+                issues: ['Industrial Runoff', 'Oil/Grease', 'Severe Contamination']
+            };
+        }
+        // 🟡 4. Yellowish / Chemical (High R+G, Low B) if not caught by rust
+        else if (r > 150 && g > 150 && b < 100) {
+            diagnosis = {
+                status: 'Warning',
+                color: 'text-yellow-500',
+                bg: 'bg-yellow-500/10',
+                border: 'border-yellow-500/50',
+                icon: AlertTriangle,
+                message: 'Discoloration detected (Possible Chemical).',
+                metrics: { turbidity: 45, ph: 8.0, bio: 12 },
+                issues: ['Chemical Discoloration', 'Sulfur Presence']
+            };
+        }
+
+        // Default is CLEAN (White/Blue/Greyish-White)
+
+        setResults(diagnosis);
+    };
+
+    const handleFileSelect = (e) => {
+        const file = e.target.files[0];
         if (file) {
-            setSelectedImage(file);
             const reader = new FileReader();
-            reader.onloadend = () => {
-                setImagePreview(reader.result);
+            reader.onload = (event) => {
+                setSelectedImage(event.target.result);
+                setResults(null);
+                startScan(event.target.result);
             };
             reader.readAsDataURL(file);
-            setResults(null);
         }
     };
 
-    const analyzeImage = async () => {
-        if (!selectedImage) return;
-
+    const startScan = (imageSrc) => {
         setAnalyzing(true);
+        setScanProgress(0);
 
-        // Simulate AI analysis (replace with actual API call)
+        // Simulation Steps
+        const steps = [
+            { t: 500, label: 'Initializing Neural Net...' },
+            { t: 1500, label: 'Identifying Particles...' },
+            { t: 2500, label: 'Analyzing Color Spectrum...' },
+            { t: 3500, label: 'Calculating Toxicity...' },
+        ];
+
+        steps.forEach(step => {
+            setTimeout(() => setScanStep(step.label), step.t);
+        });
+
+        // Loop progress bar
+        const interval = setInterval(() => {
+            setScanProgress(prev => {
+                if (prev >= 100) {
+                    clearInterval(interval);
+                    return 100;
+                }
+                return prev + 2;
+            });
+        }, 80);
+
+        // Finish
         setTimeout(() => {
-            const mockResults = {
-                overall: Math.random() > 0.5 ? 'clean' : 'contaminated',
-                confidence: (Math.random() * 30 + 70).toFixed(1),
-                detections: [
-                    {
-                        type: Math.random() > 0.5 ? 'contamination' : 'rust',
-                        severity: Math.random() > 0.5 ? 'high' : 'medium',
-                        location: 'Top-right section',
-                        confidence: (Math.random() * 20 + 75).toFixed(1)
-                    },
-                    {
-                        type: 'algae',
-                        severity: 'low',
-                        location: 'Bottom-left corner',
-                        confidence: (Math.random() * 20 + 60).toFixed(1)
-                    }
-                ],
-                parameters: {
-                    turbidity: (Math.random() * 5).toFixed(2),
-                    pH: (6.5 + Math.random() * 2).toFixed(1),
-                    colorIndex: (Math.random() * 10).toFixed(1)
-                },
-                recommendations: [
-                    'Schedule immediate cleaning',
-                    'Check water filtration system',
-                    'Monitor pH levels closely'
-                ]
-            };
-            setResults(mockResults);
+            analyzeImageColor(imageSrc);
             setAnalyzing(false);
-        }, 2000);
-    };
-
-    const clearImage = () => {
-        setSelectedImage(null);
-        setImagePreview(null);
-        setResults(null);
-        if (fileInputRef.current) fileInputRef.current.value = '';
-        if (cameraInputRef.current) cameraInputRef.current.value = '';
-    };
-
-    const getSeverityColor = (severity) => {
-        switch (severity) {
-            case 'high': return 'text-red-600 bg-red-50 border-red-200';
-            case 'medium': return 'text-amber-600 bg-amber-50 border-amber-200';
-            case 'low': return 'text-green-600 bg-green-50 border-green-200';
-            default: return 'text-gray-600 bg-gray-50 border-gray-200';
-        }
+            setScanStep('Analysis Complete');
+        }, 4000);
     };
 
     return (
-        <div className="space-y-6">
-            {/* Header */}
-            <div className="bg-gradient-to-r from-cyan-50 to-blue-50 p-6 rounded-2xl border border-cyan-100">
-                <div className="flex items-center gap-3 mb-2">
-                    <div className="w-12 h-12 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
-                        <Eye className="w-6 h-6 text-white" />
-                    </div>
-                    <div>
-                        <h2 className="text-2xl font-bold text-gray-900">AI Vision Inspection</h2>
-                        <p className="text-sm text-gray-600">Upload or capture tank images for AI-powered contamination detection</p>
-                    </div>
-                </div>
-            </div>
+        <div className="relative min-h-[600px] w-full bg-slate-900 rounded-3xl overflow-hidden border border-slate-700 shadow-2xl">
+            {/* Hidden Canvas for Processing */}
+            <canvas ref={canvasRef} className="hidden" />
 
-            {/* Upload Section */}
-            <div className="grid md:grid-cols-2 gap-6">
-                {/* Upload Buttons */}
-                <div className="space-y-4">
-                    <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => fileInputRef.current?.click()}
-                        className="w-full p-6 bg-white border-2 border-dashed border-cyan-300 rounded-2xl hover:border-cyan-500 hover:bg-cyan-50 transition-all group"
+            {/* Background Grid Effect */}
+            <div className="absolute inset-0 z-0 opacity-20 pointer-events-none"
+                style={{
+                    backgroundImage: 'linear-gradient(rgba(6, 182, 212, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(6, 182, 212, 0.1) 1px, transparent 1px)',
+                    backgroundSize: '40px 40px'
+                }}
+            />
+
+            {/* Main Content */}
+            <div className="relative z-10 p-8 h-full flex flex-col items-center justify-center">
+
+                {!selectedImage ? (
+                    // 🟢 IDLE STATE
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="text-center space-y-8 max-w-lg"
                     >
-                        <Upload className="w-12 h-12 text-cyan-600 mx-auto mb-3 group-hover:scale-110 transition-transform" />
-                        <p className="font-bold text-gray-900">Upload Image</p>
-                        <p className="text-sm text-gray-500 mt-1">Click to select from files</p>
-                        <input
-                            ref={fileInputRef}
-                            type="file"
-                            accept="image/*"
-                            onChange={handleFileSelect}
-                            className="hidden"
-                        />
-                    </motion.button>
-
-                    <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => cameraInputRef.current?.click()}
-                        className="w-full p-6 bg-white border-2 border-dashed border-blue-300 rounded-2xl hover:border-blue-500 hover:bg-blue-50 transition-all group"
-                    >
-                        <Camera className="w-12 h-12 text-blue-600 mx-auto mb-3 group-hover:scale-110 transition-transform" />
-                        <p className="font-bold text-gray-900">Capture Photo</p>
-                        <p className="text-sm text-gray-500 mt-1">Use camera to take picture</p>
-                        <input
-                            ref={cameraInputRef}
-                            type="file"
-                            accept="image/*"
-                            capture="environment"
-                            onChange={handleFileSelect}
-                            className="hidden"
-                        />
-                    </motion.button>
-                </div>
-
-                {/* Image Preview */}
-                <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
-                    {imagePreview ? (
-                        <div className="space-y-4">
-                            <div className="relative">
-                                <img
-                                    src={imagePreview}
-                                    alt="Preview"
-                                    className="w-full h-64 object-cover rounded-xl border-2 border-gray-200"
-                                />
-                                <button
-                                    onClick={clearImage}
-                                    className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-all shadow-lg"
-                                >
-                                    <Trash2 className="w-4 h-4" />
-                                </button>
+                        <div className="relative mx-auto w-32 h-32">
+                            <motion.div
+                                animate={{ rotate: 360 }}
+                                transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+                                className="absolute inset-0 rounded-full border-2 border-dashed border-cyan-500/30"
+                            />
+                            <div className="absolute inset-0 flex items-center justify-center">
+                                <Scan className="w-16 h-16 text-cyan-400" />
                             </div>
+                        </div>
+
+                        <div>
+                            <h2 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 mb-4">
+                                AquaSight AI v2.0
+                            </h2>
+                            <p className="text-slate-400 text-lg">
+                                Ready for bio-scan. Upload water sample for molecular structure analysis.
+                            </p>
+                        </div>
+
+                        <div className="flex gap-4 justify-center">
                             <button
-                                onClick={analyzeImage}
-                                disabled={analyzing}
-                                className="w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-xl font-bold hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                onClick={() => fileInputRef.current.click()}
+                                className="px-8 py-4 bg-cyan-500/10 border border-cyan-500/50 text-cyan-400 rounded-xl hover:bg-cyan-500/20 hover:scale-105 transition-all flex items-center gap-3 font-bold"
                             >
-                                {analyzing ? (
-                                    <>
-                                        <Loader className="w-5 h-5 animate-spin" />
-                                        Analyzing...
-                                    </>
-                                ) : (
-                                    <>
-                                        <Eye className="w-5 h-5" />
-                                        Analyze Image
-                                    </>
-                                )}
+                                <Upload className="w-5 h-5" />
+                                Load Sample
+                            </button>
+                            <button
+                                onClick={() => cameraInputRef.current.click()}
+                                className="px-8 py-4 bg-blue-500/10 border border-blue-500/50 text-blue-400 rounded-xl hover:bg-blue-500/20 hover:scale-105 transition-all flex items-center gap-3 font-bold"
+                            >
+                                <Camera className="w-5 h-5" />
+                                Activate Cam
                             </button>
                         </div>
-                    ) : (
-                        <div className="h-full flex flex-col items-center justify-center text-gray-400 py-12">
-                            <ImageIcon className="w-20 h-20 mb-4" />
-                            <p className="font-semibold">No image selected</p>
-                            <p className="text-sm">Upload or capture an image to begin</p>
+                    </motion.div>
+                ) : (
+                    // 🔵 ANALYSIS STATE
+                    <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+
+                        {/* LEFT: SCANNER VIEW */}
+                        <div className="relative aspect-square rounded-2xl overflow-hidden border-2 border-cyan-500/30 bg-black shadow-[0_0_50px_rgba(6,182,212,0.15)] group">
+                            <img
+                                src={selectedImage}
+                                alt="Sample"
+                                className="w-full h-full object-cover opacity-80"
+                            />
+
+                            {/* HUD Overlay */}
+                            <div className="absolute inset-0 pointer-events-none">
+                                <div className="absolute top-4 left-4 flex gap-2">
+                                    <span className="px-2 py-1 bg-black/50 border border-cyan-500/30 text-cyan-400 text-xs font-mono rounded">CAM-01</span>
+                                    <span className="px-2 py-1 bg-black/50 border border-cyan-500/30 text-cyan-400 text-xs font-mono rounded">LIVE</span>
+                                </div>
+
+                                {/* Target Reticle */}
+                                <div className="absolute inset-0 border-[20px] border-cyan-500/10 rounded-xl" />
+                                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 border border-white/20 rounded-full" />
+                                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+
+                                {/* 🔴 LASER SCANNER ANIMATION */}
+                                {analyzing && (
+                                    <motion.div
+                                        animate={{ top: ['0%', '100%', '0%'] }}
+                                        transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                                        className="absolute left-0 right-0 h-1 bg-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.8)] z-20"
+                                    >
+                                        <div className="absolute top-0 left-0 right-0 h-20 bg-gradient-to-b from-cyan-400/20 to-transparent" />
+                                    </motion.div>
+                                )}
+                            </div>
                         </div>
-                    )}
-                </div>
+
+                        {/* RIGHT: DATA PANEL */}
+                        <div className="space-y-6">
+                            {analyzing ? (
+                                <motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    className="space-y-6"
+                                >
+                                    <div className="flex items-center justify-between text-cyan-400 font-mono text-sm">
+                                        <span>PROCESSING DATA...</span>
+                                        <span>{scanProgress}%</span>
+                                    </div>
+
+                                    {/* Progress Bar */}
+                                    <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
+                                        <motion.div
+                                            className="h-full bg-cyan-500"
+                                            style={{ width: `${scanProgress}%` }}
+                                        />
+                                    </div>
+
+                                    {/* Terminal Output */}
+                                    <div className="font-mono text-green-400 text-sm bg-black/50 p-4 rounded-xl border border-white/10 h-32 flex flex-col justify-end">
+                                        <p className="opacity-50">System initialized...</p>
+                                        <p className="opacity-75">Reading optical sensor data...</p>
+                                        <p className="text-cyan-300 animate-pulse">&gt; {scanStep}</p>
+                                    </div>
+                                </motion.div>
+                            ) : results ? (
+                                <motion.div
+                                    initial={{ opacity: 0, x: 20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    className="space-y-6"
+                                >
+                                    <div className={`p-6 rounded-2xl border ${results.border} ${results.bg} backdrop-blur-md`}>
+                                        <div className="flex items-start justify-between mb-4">
+                                            <div>
+                                                <div className="flex items-center gap-2 mb-2">
+                                                    <results.icon className={`w-6 h-6 ${results.color}`} />
+                                                    <h3 className={`text-2xl font-black uppercase tracking-wider ${results.color}`}>
+                                                        {results.status}
+                                                    </h3>
+                                                </div>
+                                                <p className="text-slate-300">{results.message}</p>
+                                            </div>
+                                            <div className={`px-3 py-1 rounded-full border ${results.border} ${results.color} text-xs font-bold uppercase`}>
+                                                Confidence 98%
+                                            </div>
+                                        </div>
+
+                                        {/* Metrics Grid */}
+                                        <div className="grid grid-cols-3 gap-3 mb-6">
+                                            <div className="p-3 rounded-lg bg-black/20 text-center">
+                                                <div className="text-xs text-slate-400 uppercase mb-1">Turbidity</div>
+                                                <div className="text-xl font-bold text-white">{results.metrics.turbidity} <span className="text-xs text-slate-500">NTU</span></div>
+                                            </div>
+                                            <div className="p-3 rounded-lg bg-black/20 text-center">
+                                                <div className="text-xs text-slate-400 uppercase mb-1">pH Level</div>
+                                                <div className="text-xl font-bold text-white">{results.metrics.ph}</div>
+                                            </div>
+                                            <div className="p-3 rounded-lg bg-black/20 text-center">
+                                                <div className="text-xs text-slate-400 uppercase mb-1">Bio-Load</div>
+                                                <div className="text-xl font-bold text-white">
+                                                    {results.metrics.bio}<span className="text-xs text-slate-500">%</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Issues List */}
+                                        {results.issues.length > 0 && (
+                                            <div className="space-y-2">
+                                                {results.issues.map((issue, i) => (
+                                                    <div key={i} className="flex items-center gap-3 text-sm text-slate-300 bg-black/20 px-3 py-2 rounded">
+                                                        <AlertTriangle className="w-4 h-4 text-amber-500" />
+                                                        {issue}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <button
+                                        onClick={() => setSelectedImage(null)}
+                                        className="w-full py-4 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold transition-all flex items-center justify-center gap-2"
+                                    >
+                                        <RefreshCw className="w-4 h-4" />
+                                        Analyze New Sample
+                                    </button>
+                                </motion.div>
+                            ) : null}
+                        </div>
+                    </div>
+                )}
             </div>
 
-            {/* Results Section */}
-            {results && (
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm space-y-6"
-                >
-                    {/* Overall Status */}
-                    <div className={`p-4 rounded-xl border-2 ${results.overall === 'clean' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
-                        <div className="flex items-center gap-3">
-                            {results.overall === 'clean' ? (
-                                <CheckCircle className="w-8 h-8 text-green-600" />
-                            ) : (
-                                <XCircle className="w-8 h-8 text-red-600" />
-                            )}
-                            <div className="flex-1">
-                                <h3 className="text-xl font-bold text-gray-900">
-                                    {results.overall === 'clean' ? 'Tank Appears Clean' : 'Contamination Detected'}
-                                </h3>
-                                <p className="text-sm text-gray-600">Confidence: {results.confidence}%</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Detections */}
-                    <div>
-                        <h4 className="font-bold text-gray-900 mb-3 flex items-center gap-2">
-                            <AlertTriangle className="w-5 h-5 text-amber-600" />
-                            Detected Issues
-                        </h4>
-                        <div className="space-y-2">
-                            {results.detections.map((detection, index) => (
-                                <div key={index} className={`p-3 rounded-lg border ${getSeverityColor(detection.severity)}`}>
-                                    <div className="flex justify-between items-start">
-                                        <div>
-                                            <p className="font-bold capitalize">{detection.type}</p>
-                                            <p className="text-sm">{detection.location}</p>
-                                        </div>
-                                        <div className="text-right">
-                                            <span className="text-xs font-bold uppercase">{detection.severity}</span>
-                                            <p className="text-xs">{detection.confidence}% confident</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Parameters */}
-                    <div>
-                        <h4 className="font-bold text-gray-900 mb-3">Water Quality Parameters</h4>
-                        <div className="grid grid-cols-3 gap-4">
-                            <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
-                                <p className="text-xs text-gray-600 mb-1">Turbidity</p>
-                                <p className="text-xl font-bold text-gray-900">{results.parameters.turbidity} NTU</p>
-                            </div>
-                            <div className="bg-green-50 p-3 rounded-lg border border-green-200">
-                                <p className="text-xs text-gray-600 mb-1">pH Level</p>
-                                <p className="text-xl font-bold text-gray-900">{results.parameters.pH}</p>
-                            </div>
-                            <div className="bg-amber-50 p-3 rounded-lg border border-amber-200">
-                                <p className="text-xs text-gray-600 mb-1">Color Index</p>
-                                <p className="text-xl font-bold text-gray-900">{results.parameters.colorIndex}</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Recommendations */}
-                    <div>
-                        <h4 className="font-bold text-gray-900 mb-3">AI Recommendations</h4>
-                        <ul className="space-y-2">
-                            {results.recommendations.map((rec, index) => (
-                                <li key={index} className="flex items-start gap-2 text-gray-700">
-                                    <CheckCircle className="w-4 h-4 text-cyan-600 mt-0.5 flex-shrink-0" />
-                                    <span>{rec}</span>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-
-                    {/* Actions */}
-                    <div className="flex gap-3 pt-4 border-t border-gray-200">
-                        <button className="flex-1 py-2 bg-cyan-600 text-white rounded-lg font-semibold hover:bg-cyan-700 transition-all flex items-center justify-center gap-2">
-                            <Download className="w-4 h-4" />
-                            Download Report
-                        </button>
-                        <button
-                            onClick={clearImage}
-                            className="flex-1 py-2 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition-all"
-                        >
-                            Analyze Another
-                        </button>
-                    </div>
-                </motion.div>
-            )}
+            {/* Inputs */}
+            <input
+                type="file"
+                ref={fileInputRef}
+                className="hidden"
+                accept="image/*"
+                onChange={handleFileSelect}
+            />
+            <input
+                type="file"
+                ref={cameraInputRef}
+                className="hidden"
+                accept="image/*"
+                capture="environment"
+                onChange={handleFileSelect}
+            />
         </div>
     );
 };

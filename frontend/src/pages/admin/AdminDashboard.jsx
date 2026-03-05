@@ -4,7 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import {
     LogOut, LayoutDashboard, Users, Activity, Settings, Bell, Map as MapIcon,
     ClipboardList, CheckCircle, XCircle, Bot, Droplets, AlertTriangle,
-    TrendingUp, TrendingDown, Download, ChevronRight, Filter, Radio, Eye, Mail, Users as UsersIcon
+    TrendingUp, TrendingDown, Download, ChevronRight, Filter, Radio, Eye, Mail, Users as UsersIcon,
+    Shield, Wrench
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import {
@@ -168,7 +169,9 @@ const AdminDashboard = () => {
                 { id: 2, name: 'Priya Sharma', email: 'priya@example.com', role: 'user', region: 'Coimbatore', joinedDate: '2024-02-01', tanks: 2 },
                 { id: 3, name: 'Arun Patel', email: 'arun@example.com', role: 'business_partner', region: 'Chennai', joinedDate: '2024-01-20', tanks: 5 },
                 { id: 4, name: 'Lakshmi Iyer', email: 'lakshmi@example.com', role: 'user', region: 'Salem', joinedDate: '2024-02-10', tanks: 1 },
-                { id: 5, name: 'Vijay Reddy', email: 'vijay@example.com', role: 'user', region: 'Madurai', joinedDate: '2024-01-25', tanks: 2 }
+                { id: 5, name: 'Vijay Reddy', email: 'vijay@example.com', role: 'user', region: 'Madurai', joinedDate: '2024-01-25', tanks: 2 },
+                { id: 6, name: 'S. Kumar (Technician)', email: 'tech1@aquasentry.gov', role: 'technician', region: 'Salem', joinedDate: '2024-02-15', status: 'Available' },
+                { id: 7, name: 'M. Raju (Technician)', email: 'tech2@aquasentry.gov', role: 'technician', region: 'Coimbatore', joinedDate: '2024-02-16', status: 'On Job' }
             ]);
 
             setIsLoading(false);
@@ -416,6 +419,16 @@ const AdminDashboard = () => {
                         </motion.button>
 
                         <motion.button
+                            onClick={() => setActiveTab('technicians')}
+                            whileHover={{ x: 4, scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${activeTab === 'technicians' ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/30' : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'}`}
+                        >
+                            <Wrench className="w-5 h-5" />
+                            <span className="font-semibold">Field Ops</span>
+                        </motion.button>
+
+                        <motion.button
                             onClick={() => setActiveTab('settings')}
                             whileHover={{ x: 4, scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
@@ -630,6 +643,55 @@ const AdminDashboard = () => {
                                                 <Area type="monotone" dataKey="chlorine" stroke="#10b981" fillOpacity={1} fill="url(#colorChlorine)" strokeWidth={2} />
                                             </AreaChart>
                                         </ResponsiveContainer>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Government Welfare Impact Section (Admin View) */}
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                                {/* 1. Compliance Badge */}
+                                <div className="bg-white border border-emerald-100 p-6 rounded-2xl flex items-center gap-4 relative overflow-hidden shadow-sm hover:shadow-md transition-all">
+                                    <div className="h-14 w-14 bg-emerald-50 rounded-full flex items-center justify-center border border-emerald-100">
+                                        <Shield className="w-7 h-7 text-emerald-500" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-emerald-600 font-bold text-xs tracking-widest uppercase mb-1">Safety Standard</h3>
+                                        <p className="text-gray-900 font-black text-lg">ISO 10500:2012</p>
+                                        <p className="text-emerald-600 text-[10px] font-mono mt-1 flex items-center gap-1 font-semibold">
+                                            <CheckCircle className="w-3 h-3" /> GOVT. STANDARDS MET
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {/* 2. Beneficiary Impact */}
+                                <div className="bg-white border border-blue-100 p-6 rounded-2xl flex items-center gap-4 relative overflow-hidden shadow-sm hover:shadow-md transition-all">
+                                    <div className="h-14 w-14 bg-blue-50 rounded-full flex items-center justify-center border border-blue-100">
+                                        <Users className="w-7 h-7 text-blue-500" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-blue-600 font-bold text-xs tracking-widest uppercase mb-1">Public Welfare</h3>
+                                        <div className="flex items-baseline gap-1">
+                                            <span className="text-gray-900 font-black text-2xl">1,248</span>
+                                            <span className="text-gray-500 text-xs font-semibold">Families Served</span>
+                                        </div>
+                                        <p className="text-blue-600 text-[10px] font-mono mt-1 font-semibold">↑ 12% EXPANSION</p>
+                                    </div>
+                                </div>
+
+                                {/* 3. Employment & Livelihood */}
+                                <div className="bg-white border border-purple-100 p-6 rounded-2xl flex items-center gap-4 relative overflow-hidden shadow-sm hover:shadow-md transition-all">
+                                    <div className="h-14 w-14 bg-purple-50 rounded-full flex items-center justify-center border border-purple-100">
+                                        <Wrench className="w-7 h-7 text-purple-500" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-purple-600 font-bold text-xs tracking-widest uppercase mb-1">Rural Employment</h3>
+                                        <div className="flex items-baseline gap-1">
+                                            <span className="text-gray-900 font-black text-2xl">42</span>
+                                            <span className="text-gray-500 text-xs font-semibold">Technicians Hired</span>
+                                        </div>
+                                        <p className="text-purple-600 text-[10px] font-mono mt-1 flex items-center gap-1 font-semibold">
+                                            ₹1.2L WAGES GENERATED
+                                        </p>
                                     </div>
                                 </div>
                             </div>
@@ -882,6 +944,88 @@ const AdminDashboard = () => {
                                     ))}
                                 </div>
                             )}
+                        </div>
+                    )}
+
+                    {/* Technicians / Field Ops Tab */}
+                    {activeTab === 'technicians' && (
+                        <div className="space-y-6">
+                            <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                                <div className="p-6 border-b border-gray-200 flex justify-between items-center">
+                                    <h2 className="text-lg font-bold text-gray-900">Field Operations Team</h2>
+                                    <span className="px-3 py-1 bg-gradient-to-r from-purple-600 to-blue-600 text-white text-xs font-bold rounded-full">
+                                        {registeredUsers.filter(u => u.role === 'technician').length} Active Agents
+                                    </span>
+                                </div>
+                                <div className="overflow-x-auto">
+                                    <table className="w-full">
+                                        <thead className="bg-gray-50 border-b border-gray-200">
+                                            <tr>
+                                                <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Technician</th>
+                                                <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Region</th>
+                                                <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Status</th>
+                                                <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-gray-100">
+                                            {registeredUsers.filter(u => u.role === 'technician').map(tech => (
+                                                <tr key={tech.id} className="hover:bg-gray-50/50">
+                                                    <td className="px-6 py-4">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-bold">
+                                                                {tech.name.charAt(0)}
+                                                            </div>
+                                                            <div>
+                                                                <p className="font-bold text-gray-900">{tech.name}</p>
+                                                                <p className="text-xs text-gray-500">{tech.email}</p>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-6 py-4 text-sm text-gray-600">{tech.region}</td>
+                                                    <td className="px-6 py-4">
+                                                        <span className={`px-3 py-1 rounded-full text-xs font-bold ${tech.status === 'Available' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
+                                                            }`}>
+                                                            {tech.status || 'Available'}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <button className="text-blue-600 text-sm font-bold hover:underline">View Schedule</button>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                            {registeredUsers.filter(u => u.role === 'technician').length === 0 && (
+                                                <tr>
+                                                    <td colSpan="4" className="px-6 py-8 text-center text-gray-500 italic">
+                                                        No technicians registered yet.
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            {/* Dispatch Console */}
+                            <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+                                <h3 className="text-lg font-bold text-gray-900 mb-4">Pending Dispatch Requests</h3>
+                                {reportedIssues.length > 0 ? (
+                                    <div className="grid gap-4">
+                                        {reportedIssues.map(iss => (
+                                            <div key={iss.id} className="border border-gray-100 p-4 rounded-xl flex items-center justify-between bg-slate-50">
+                                                <div>
+                                                    <p className="font-bold text-gray-900">{iss.tank}</p>
+                                                    <p className="text-sm text-gray-500">{iss.issue}</p>
+                                                </div>
+                                                <button className="bg-slate-900 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-slate-800 transition-colors">
+                                                    Dispatch Tech
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <p className="text-gray-500 italic">No pending requests.</p>
+                                )}
+                            </div>
                         </div>
                     )}
 

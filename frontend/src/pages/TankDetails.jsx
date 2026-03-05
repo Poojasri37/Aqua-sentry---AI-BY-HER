@@ -9,17 +9,21 @@ import {
 import SensorChart from '../components/dashboard/SensorChart';
 import { generateSensorHistory, getTankDetails } from '../utils/mockData';
 import { useSocket } from '../context/SocketContext';
+import { useAuth } from '../context/AuthContext';
 import ReportIssueModal from '../components/dashboard/ReportIssueModal';
+import DigitalTwin3D from '../components/DigitalTwin3D';
 
 const TankDetails = () => {
     const { id } = useParams();
     const navigate = useNavigate();
+    const { user } = useAuth();
     const [tank, setTank] = useState(null);
     const [history, setHistory] = useState([]);
     const [activeTab, setActiveTab] = useState('overview'); // overview, vision, maintenance
     const [aiAnalysis, setAiAnalysis] = useState('Initialize analysis for regional water security compliance.');
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+    const [microplasticData, setMicroplasticData] = useState(null);
 
     const { lastReading, isConnected, subscribeToTank, unsubscribeFromTank } = useSocket();
 
@@ -27,6 +31,48 @@ const TankDetails = () => {
         const data = getTankDetails(id);
         setTank(data);
         setHistory(generateSensorHistory(24));
+
+        // Generate microplastic detection data (simulating YOLO model results)
+        const generateMicroplasticData = () => {
+            const particleTypes = ['PET', 'HDPE', 'PVC', 'LDPE', 'PP', 'PS'];
+            const numParticles = Math.floor(Math.random() * 40) + 30; // 30-70 particles
+
+            const particles = [];
+            const typeCounts = {};
+
+            for (let i = 0; i < numParticles; i++) {
+                const type = particleTypes[Math.floor(Math.random() * particleTypes.length)];
+                typeCounts[type] = (typeCounts[type] || 0) + 1;
+
+                particles.push({
+                    id: i,
+                    type: type,
+                    confidence: (Math.random() * 0.3 + 0.7).toFixed(2),
+                    bbox: {
+                        x: Math.random() * 0.8 + 0.1,
+                        y: Math.random() * 0.8 + 0.1,
+                        width: Math.random() * 0.1 + 0.02,
+                        height: Math.random() * 0.1 + 0.02
+                    },
+                    position3D: {
+                        x: (Math.random() - 0.5) * 3.5,
+                        y: Math.random() * 2.5 + 0.2,
+                        z: (Math.random() - 0.5) * 3.5
+                    }
+                });
+            }
+
+            const microplasticPercentage = Math.min((numParticles / 80) * 100, 95).toFixed(1);
+
+            return {
+                totalParticles: numParticles,
+                microplasticPercentage: parseFloat(microplasticPercentage),
+                particlesByType: typeCounts,
+                particles: particles
+            };
+        };
+
+        setMicroplasticData(generateMicroplasticData());
 
         subscribeToTank(id);
         return () => unsubscribeFromTank(id);
@@ -230,72 +276,169 @@ const TankDetails = () => {
                                 <button className="text-cyan-600 font-bold text-sm hover:underline italic">Advanced filtering</button>
                             </div>
                             <div className="divide-y divide-slate-100">
-                                {[1, 2].map(i => (
-                                    <div key={i} className="px-8 py-6 flex items-center justify-between hover:bg-slate-50 transition-colors">
-                                        <div className="flex gap-4">
-                                            <div className="p-3 bg-slate-100 text-slate-400 rounded-2xl h-fit border border-slate-200"><CheckCircle className="w-5 h-5" /></div>
-                                            <div>
-                                                <h5 className="font-bold text-slate-900">System Integrity Audit - Salem {i === 1 ? 'Alpha' : 'Beta'}</h5>
-                                                <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">
-                                                    Compliance Verified • {i === 1 ? '12h ago' : '3 days ago'}
-                                                </p>
-                                            </div>
+                                {tank?.location?.address?.includes('New Delhi') || tank?.location?.address?.includes('Pragati Maidan') ? (
+                                    <div className="px-8 py-10 text-center">
+                                        <p className="text-xs font-bold text-slate-400 italic">No Salem-specific audits applicable to this regional asset.</p>
+                                        <div className="mt-4 p-4 bg-emerald-50 rounded-2xl border border-emerald-100 inline-flex items-center gap-2">
+                                            <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                                            <span className="text-[10px] font-black text-emerald-700 uppercase tracking-widest">New Delhi Compliance Verified</span>
                                         </div>
-                                        <ArrowUpRight className="w-5 h-5 text-slate-300" />
                                     </div>
-                                ))}
+                                ) : (
+                                    [1, 2].map(i => (
+                                        <div key={i} className="px-8 py-6 flex items-center justify-between hover:bg-slate-50 transition-colors">
+                                            <div className="flex gap-4">
+                                                <div className="p-3 bg-slate-100 text-slate-400 rounded-2xl h-fit border border-slate-200"><CheckCircle className="w-5 h-5" /></div>
+                                                <div>
+                                                    <h5 className="font-bold text-slate-900">System Integrity Audit - Salem {i === 1 ? 'Alpha' : 'Beta'}</h5>
+                                                    <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">
+                                                        Compliance Verified • {i === 1 ? '12h ago' : '3 days ago'}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <ArrowUpRight className="w-5 h-5 text-slate-300" />
+                                        </div>
+                                    ))
+                                )}
                             </div>
                         </div>
 
-                        {/* Vision Analysis Section */}
+                        {/* Microplastic Detection & Digital Twin Section */}
                         <div className="bg-white p-10 rounded-[2.5rem] border border-slate-200 shadow-sm relative overflow-hidden mt-8">
                             <div className="flex items-center justify-between mb-8">
                                 <div>
-                                    <h4 className="text-xl font-black text-slate-900 tracking-tight">AI Vision Inspection</h4>
-                                    <p className="text-xs text-slate-400 font-bold uppercase mt-1">Real-time Contamination & Edibility Audit</p>
+                                    <h4 className="text-xl font-black text-slate-900 tracking-tight">AI Vision - Microplastic Detection</h4>
+                                    <p className="text-xs text-slate-400 font-bold uppercase mt-1">Real-time YOLO Model Analysis & Digital Twin</p>
                                 </div>
                                 <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl"><Camera className="w-6 h-6" /></div>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                                <div className="relative group">
-                                    <div className="aspect-video bg-slate-100 rounded-[2rem] border-2 border-dashed border-slate-200 flex flex-col items-center justify-center p-6 transition-all group-hover:bg-slate-50 group-hover:border-indigo-300">
-                                        <div className="p-4 bg-white rounded-2xl shadow-sm mb-4 group-hover:scale-110 transition-transform"><Camera className="w-8 h-8 text-slate-400" /></div>
-                                        <p className="text-sm font-black text-slate-900 mb-1">Upload Inspection Image</p>
-                                        <p className="text-[10px] text-slate-400 font-bold uppercase">Webcam or local file upload</p>
-                                        <input
-                                            type="file"
-                                            className="absolute inset-0 opacity-0 cursor-pointer"
-                                            onChange={() => alert('Image analysis started... The Gemini Vision engine is processing your asset.')}
-                                        />
-                                    </div>
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                                {/* Left: Detection Results */}
+                                <div className="space-y-6">
+                                    {microplasticData && (
+                                        <>
+                                            {/* Contamination Percentage */}
+                                            <div className="p-6 bg-gradient-to-br from-red-50 to-orange-50 rounded-3xl border border-red-100">
+                                                <div className="flex justify-between items-center mb-4">
+                                                    <p className="text-[10px] font-black text-slate-900 uppercase tracking-widest">Microplastic Contamination</p>
+                                                    <span className={`px-3 py-1 rounded-full text-[10px] font-black ${microplasticData.microplasticPercentage < 25 ? 'bg-green-100 text-green-700' :
+                                                        microplasticData.microplasticPercentage < 50 ? 'bg-yellow-100 text-yellow-700' :
+                                                            microplasticData.microplasticPercentage < 75 ? 'bg-orange-100 text-orange-700' :
+                                                                'bg-red-100 text-red-700'
+                                                        }`}>
+                                                        {microplasticData.microplasticPercentage < 25 ? 'LOW' :
+                                                            microplasticData.microplasticPercentage < 50 ? 'MODERATE' :
+                                                                microplasticData.microplasticPercentage < 75 ? 'HIGH' : 'CRITICAL'}
+                                                    </span>
+                                                </div>
+                                                <div className="text-5xl font-black text-slate-900 mb-3">
+                                                    {microplasticData.microplasticPercentage}%
+                                                </div>
+                                                <div className="h-3 bg-slate-200 rounded-full overflow-hidden">
+                                                    <div
+                                                        className="h-full bg-gradient-to-r from-orange-500 to-red-500 transition-all duration-1000"
+                                                        style={{ width: `${microplasticData.microplasticPercentage}%` }}
+                                                    />
+                                                </div>
+                                                <p className="text-[10px] text-slate-500 font-medium mt-3">
+                                                    Detected by YOLO Vision Model
+                                                </p>
+                                            </div>
+
+                                            {/* Particle Count */}
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100">
+                                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Total Particles</p>
+                                                    <p className="text-3xl font-black text-slate-900">{microplasticData.totalParticles}</p>
+                                                </div>
+                                                <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100">
+                                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Particle Types</p>
+                                                    <p className="text-3xl font-black text-slate-900">{Object.keys(microplasticData.particlesByType).length}</p>
+                                                </div>
+                                            </div>
+
+                                            {/* Particle Breakdown */}
+                                            <div className="p-6 bg-slate-50 rounded-3xl border border-slate-100">
+                                                <p className="text-[10px] font-black text-slate-900 uppercase tracking-widest mb-4">Particle Type Breakdown</p>
+                                                <div className="space-y-3">
+                                                    {Object.entries(microplasticData.particlesByType).map(([type, count]) => (
+                                                        <div key={type} className="flex items-center justify-between">
+                                                            <div className="flex items-center gap-3">
+                                                                <div className={`w-3 h-3 rounded-full ${type === 'PET' ? 'bg-red-400' :
+                                                                    type === 'HDPE' ? 'bg-teal-400' :
+                                                                        type === 'PVC' ? 'bg-yellow-400' :
+                                                                            type === 'LDPE' ? 'bg-green-400' :
+                                                                                type === 'PP' ? 'bg-pink-400' :
+                                                                                    'bg-purple-400'
+                                                                    }`} />
+                                                                <span className="text-sm font-bold text-slate-700">{type}</span>
+                                                            </div>
+                                                            <span className="text-lg font-black text-slate-900">{count}</span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+
+                                            {/* Color Legend */}
+                                            <div className="p-4 bg-blue-50 rounded-2xl border border-blue-100">
+                                                <p className="text-[10px] font-black text-blue-900 uppercase tracking-widest mb-3">Particle Color Legend</p>
+                                                <div className="grid grid-cols-3 gap-2 text-[10px]">
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="w-2 h-2 rounded-full bg-red-400" />
+                                                        <span className="text-slate-600 font-medium">PET</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="w-2 h-2 rounded-full bg-teal-400" />
+                                                        <span className="text-slate-600 font-medium">HDPE</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="w-2 h-2 rounded-full bg-yellow-400" />
+                                                        <span className="text-slate-600 font-medium">PVC</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="w-2 h-2 rounded-full bg-green-400" />
+                                                        <span className="text-slate-600 font-medium">LDPE</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="w-2 h-2 rounded-full bg-pink-400" />
+                                                        <span className="text-slate-600 font-medium">PP</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="w-2 h-2 rounded-full bg-purple-400" />
+                                                        <span className="text-slate-600 font-medium">PS</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </>
+                                    )}
                                 </div>
 
-                                <div className="space-y-6">
-                                    <div className="p-6 bg-slate-50 rounded-3xl border border-slate-100">
-                                        <div className="flex justify-between items-center mb-4">
-                                            <p className="text-[10px] font-black text-slate-900 uppercase tracking-widest">Edibility Range</p>
-                                            <span className="px-3 py-1 bg-emerald-100 text-emerald-700 text-[10px] font-black rounded-full">SAFE FOR DRINKING</span>
-                                        </div>
-                                        <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
-                                            <div className="h-full bg-emerald-500 w-[92%]"></div>
-                                        </div>
-                                        <p className="text-[10px] text-slate-400 font-bold mt-2 text-right">92% CONFIDENCE SCORE</p>
+                                {/* Right: 3D Digital Twin */}
+                                <div className="space-y-4">
+                                    <div className="bg-slate-900 rounded-3xl overflow-hidden border-2 border-slate-700" style={{ height: '600px' }}>
+                                        {microplasticData ? (
+                                            <DigitalTwin3D
+                                                microplasticData={microplasticData}
+                                                tankDimensions={{ width: 4, height: 3, depth: 4 }}
+                                            />
+                                        ) : (
+                                            <div className="h-full flex items-center justify-center text-slate-400">
+                                                <div className="text-center">
+                                                    <Droplets className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                                                    <p className="text-sm font-medium">Loading Digital Twin...</p>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
-
-                                    <div className="p-6 bg-slate-50 rounded-3xl border border-slate-100">
-                                        <div className="flex justify-between items-center mb-4">
-                                            <p className="text-[10px] font-black text-slate-900 uppercase tracking-widest">Contamination Level</p>
-                                            <span className="text-lg font-black text-slate-900">1.2<span className="text-xs text-slate-400">/10</span></span>
+                                    <div className="p-4 bg-cyan-50 rounded-2xl border border-cyan-100">
+                                        <div className="flex items-start gap-3">
+                                            <Info className="w-4 h-4 text-cyan-600 flex-shrink-0 mt-0.5" />
+                                            <div className="text-[10px] text-cyan-800">
+                                                <p className="font-black uppercase tracking-widest mb-1">3D Digital Twin Active</p>
+                                                <p className="font-medium">Rectangular tank with floating microplastics. Use mouse to rotate, zoom, and pan.</p>
+                                            </div>
                                         </div>
-                                        <div className="flex gap-1">
-                                            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(i => (
-                                                <div key={i} className={`h-1.5 flex-1 rounded-full ${i === 1 ? 'bg-emerald-500' : 'bg-slate-200'}`}></div>
-                                            ))}
-                                        </div>
-                                        <p className="text-[10px] text-slate-500 font-medium italic mt-4 leading-relaxed">
-                                            AI Vision detects zero algae colonies and structural integrity within nominal range.
-                                        </p>
                                     </div>
                                 </div>
                             </div>

@@ -9,7 +9,8 @@ import {
     ArrowLeft,
     ArrowRight,
     Droplets,
-    UserCircle2
+    UserCircle2,
+    Wrench
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import ForgotPassword from '../components/auth/ForgotPassword';
@@ -29,8 +30,9 @@ const Login = () => {
 
     useEffect(() => {
         if (isAuthenticated && user) {
-            const redirectPath = user.role === 'admin' ? '/admin/dashboard' : '/user/dashboard';
-            navigate(redirectPath);
+            if (user.role === 'technician') navigate('/technician/dashboard');
+            else if (user.role === 'admin') navigate('/admin/dashboard');
+            else navigate('/user/dashboard');
         }
     }, [isAuthenticated, user, navigate]);
 
@@ -43,7 +45,9 @@ const Login = () => {
             const result = await login(email, password);
             if (result.success) {
                 const userRole = result.user.role;
-                navigate(userRole === 'admin' ? '/admin/dashboard' : '/user/dashboard');
+                if (userRole === 'technician') navigate('/technician/dashboard');
+                else if (userRole === 'admin') navigate('/admin/dashboard');
+                else navigate('/user/dashboard');
             } else {
                 setError(result.error || 'Invalid credentials. Please verify your identity.');
             }
@@ -104,28 +108,40 @@ const Login = () => {
                     )}
 
                     {/* Role Selector - Gov Style */}
-                    <div className="flex gap-4 p-1.5 bg-gray-100 rounded-xl mb-10">
+                    <div className="flex gap-2 p-1.5 bg-gray-100 rounded-xl mb-10">
                         <button
                             onClick={() => setRole('user')}
-                            className={`flex-1 flex items-center justify-center gap-3 py-3.5 rounded-lg text-sm font-bold transition-all relative ${role === 'user' ? 'text-white' : 'text-gray-500 hover:text-gray-700'
+                            className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-lg text-xs font-bold transition-all relative ${role === 'user' ? 'text-white' : 'text-gray-500 hover:text-gray-700'
                                 }`}
                         >
                             {role === 'user' && (
                                 <motion.div layoutId="role-bg-light" className="absolute inset-0 bg-gov-blue-700 rounded-lg shadow-md -z-0" />
                             )}
-                            <span className="relative z-10 flex items-center gap-2">
+                            <span className="relative z-10 flex items-center gap-1.5">
                                 <UserCircle2 className="w-4 h-4" /> User
                             </span>
                         </button>
                         <button
+                            onClick={() => setRole('technician')}
+                            className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-lg text-xs font-bold transition-all relative ${role === 'technician' ? 'text-white' : 'text-gray-500 hover:text-gray-700'
+                                }`}
+                        >
+                            {role === 'technician' && (
+                                <motion.div layoutId="role-bg-light" className="absolute inset-0 bg-gov-blue-700 rounded-lg shadow-md -z-0" />
+                            )}
+                            <span className="relative z-10 flex items-center gap-1.5">
+                                <Wrench className="w-4 h-4" /> Tech
+                            </span>
+                        </button>
+                        <button
                             onClick={() => setRole('admin')}
-                            className={`flex-1 flex items-center justify-center gap-3 py-3.5 rounded-lg text-sm font-bold transition-all relative ${role === 'admin' ? 'text-white' : 'text-gray-500 hover:text-gray-700'
+                            className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-lg text-xs font-bold transition-all relative ${role === 'admin' ? 'text-white' : 'text-gray-500 hover:text-gray-700'
                                 }`}
                         >
                             {role === 'admin' && (
                                 <motion.div layoutId="role-bg-light" className="absolute inset-0 bg-gov-blue-700 rounded-lg shadow-md -z-0" />
                             )}
-                            <span className="relative z-10 flex items-center gap-2">
+                            <span className="relative z-10 flex items-center gap-1.5">
                                 <ShieldCheck className="w-4 h-4" /> Admin
                             </span>
                         </button>
@@ -144,7 +160,7 @@ const Login = () => {
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     className="block w-full bg-gray-50 border border-gray-300 rounded-xl py-4 pl-12 pr-4 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gov-blue-100 focus:border-gov-blue-700 transition-all font-medium"
-                                    placeholder={role === 'admin' ? "admin@gov.in" : "user@portal.com"}
+                                    placeholder={role === 'admin' ? "admin@gov.in" : role === 'technician' ? "tech@aquasentry.gov" : "user@portal.com"}
                                 />
                             </div>
                         </div>

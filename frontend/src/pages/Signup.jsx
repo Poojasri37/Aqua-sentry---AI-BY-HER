@@ -185,6 +185,9 @@ const Signup = () => {
                                 Log in here
                             </Link>
                         </p>
+                        <p className="mt-4 text-xs font-semibold text-gray-400">
+                            Field Operations Team? <Link to="/technician/signup" className="text-gov-blue-600 hover:text-gov-blue-800 underline">Register as Technician</Link>
+                        </p>
                     </div>
                 </div>
 

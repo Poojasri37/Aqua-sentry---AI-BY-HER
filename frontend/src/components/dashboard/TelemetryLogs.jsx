@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSocket } from '../../context/SocketContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Radio, Clock, CheckCircle2, AlertCircle, Activity, Filter, Download } from 'lucide-react';
 
@@ -17,66 +18,78 @@ const TelemetryLogs = ({ userRole = 'admin', userWards = [] }) => {
             ];
         } else {
             // For users, only show tanks from their wards
-            return userWards.map(ward => ward.tankId).filter(Boolean);
+            return userWards.map(ward => ward.id).filter(Boolean);
         }
     };
+
+    const { lastReading, lastAlert } = useSocket();
 
     useEffect(() => {
         const tankIds = getAllTankIds();
 
-        // Generate initial logs
-        const initialLogs = Array.from({ length: 10 }, (_, i) => {
-            const randomTankId = tankIds[Math.floor(Math.random() * tankIds.length)];
-            const now = new Date(Date.now() - (i * 60000)); // Past logs
+        // If we get a real update, add it to logs
+        if (lastReading && (userRole === 'admin' || tankIds.includes(lastReading.id))) {
+            const now = new Date();
             const timeString = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
 
-            return {
-                id: `log-${Date.now()}-${i}`,
-                tankId: randomTankId,
-                message: `Telemetry successfully received for ${randomTankId}. Heartbeat packet confirmed.`,
+            const newLog = {
+                id: `log-${Date.now()}`,
+                tankId: lastReading.tankName || lastReading.id,
+                message: `Packet received: pH ${lastReading.metrics.ph}, Turbidity ${lastReading.metrics.turbidity}. Data sync complete.`,
                 status: '200 OK',
                 timestamp: timeString,
                 fullTimestamp: now.toISOString(),
                 type: 'success'
             };
-        });
 
-        setLogs(initialLogs);
+            setLogs(prev => [newLog, ...prev.slice(0, 99)]);
+        }
+    }, [lastReading]);
 
-        // Generate new logs every 5 seconds
-        const interval = setInterval(() => {
-            const randomTankId = tankIds[Math.floor(Math.random() * tankIds.length)];
+    useEffect(() => {
+        const tankIds = getAllTankIds();
+
+        // Add alerts to logs too
+        if (lastAlert && (userRole === 'admin' || tankIds.includes(lastAlert.tankId))) {
             const now = new Date();
             const timeString = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
 
-            // Randomly generate success, warning, or error logs
-            const logTypes = [
-                { type: 'success', status: '200 OK', message: `Telemetry successfully received for ${randomTankId}. Heartbeat packet confirmed.` },
-                { type: 'success', status: '200 OK', message: `Data sync completed for ${randomTankId}. All parameters normal.` },
-                { type: 'warning', status: '202 Accepted', message: `Delayed response from ${randomTankId}. Retrying connection...` },
-                { type: 'error', status: '503 Timeout', message: `Connection timeout for ${randomTankId}. Sensor offline.` }
-            ];
-
-            const randomLog = logTypes[Math.floor(Math.random() * logTypes.length)];
-
             const newLog = {
-                id: `log-${Date.now()}-${Math.random()}`,
-                tankId: randomTankId,
-                message: randomLog.message,
-                status: randomLog.status,
+                id: `log-alert-${Date.now()}`,
+                tankId: lastAlert.tankId,
+                message: `ALERT: ${lastAlert.message}`,
+                status: '400 WARN',
                 timestamp: timeString,
                 fullTimestamp: now.toISOString(),
-                type: randomLog.type
+                type: lastAlert.severity === 'critical' ? 'error' : 'warning'
             };
 
-            setLogs(prev => {
-                const updated = [newLog, ...prev];
-                return updated.slice(0, 100); // Keep last 100 logs
-            });
-        }, 5000);
+            setLogs(prev => [newLog, ...prev.slice(0, 99)]);
+        }
+    }, [lastAlert]);
 
-        return () => clearInterval(interval);
-    }, [userRole, userWards]);
+    useEffect(() => {
+        const tankIds = getAllTankIds();
+
+        // Generate initial mixed logs if none exist
+        if (logs.length === 0) {
+            const initialLogs = Array.from({ length: 5 }, (_, i) => {
+                const randomTankId = tankIds[i % tankIds.length] || 'Peelamedu Smart Tank';
+                const now = new Date(Date.now() - (i * 300000));
+
+                return {
+                    id: `log-init-${i}`,
+                    tankId: randomTankId,
+                    message: `System heartbeat confirmed for ${randomTankId}. Operational integrity 100%.`,
+                    status: '200 OK',
+                    timestamp: now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }),
+                    fullTimestamp: now.toISOString(),
+                    type: 'success'
+                };
+            });
+            setLogs(initialLogs);
+        }
+    }, [userWards]);
 
     const filteredLogs = filter === 'all'
         ? logs

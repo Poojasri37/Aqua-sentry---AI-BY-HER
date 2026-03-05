@@ -20,17 +20,17 @@ const Navbar = () => {
 
     return (
         <nav
-            className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${scrolled ? 'bg-white/80 backdrop-blur-xl shadow-lg h-16 border-b border-gray-100' : 'bg-transparent h-20'
+            className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${scrolled ? 'bg-slate-900/80 backdrop-blur-xl shadow-lg h-16 border-b border-white/5' : 'bg-transparent h-20'
                 }`}
         >
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
                 <div className="flex items-center justify-between h-full">
                     {/* Logo */}
                     <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
-                        <div className="p-2 bg-gradient-to-br from-gov-blue-700 to-gov-blue-900 rounded-lg shadow-md group-hover:shadow-blue-500/50 transition-all">
+                        <div className="p-2 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg shadow-md group-hover:shadow-cyan-500/50 transition-all">
                             <Droplets className="w-5 h-5 text-white animate-pulse" />
                         </div>
-                        <span className="text-xl md:text-2xl font-bold text-gray-900 tracking-tight">
+                        <span className="text-xl md:text-2xl font-bold tracking-tight text-white transition-colors">
                             AquaSentry
                         </span>
                     </div>
