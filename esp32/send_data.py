@@ -13,12 +13,12 @@ BACKEND_URL = "http://localhost:5000/api/sensor/data"
 # User email - change this to associate data with different users
 USER_EMAIL = "pooja@gmail.com"  # Change to "deepthitheeran@gmail.com" for Salem data
 
-# Fixed location - Pragati Maidan, New Delhi (for pooja@gmail.com)
+# Fixed location - Peelamedu, Coimbatore (for pooja@gmail.com)
 LOCATION = {
-    "latitude": 28.6139,
-    "longitude": 77.2090,
-    "city": "Pragati Maidan",
-    "region": "Pragati Maidan, New Delhi, Delhi",
+    "latitude": 11.0250,
+    "longitude": 77.0120,
+    "city": "Peelamedu",
+    "region": "Peelamedu, Coimbatore, Tamil Nadu",
     "country": "IN"
 }
 # ==================================================
@@ -134,6 +134,17 @@ def calculate_water_quality_metrics(sensor_data):
     chlorine = round(base_chlorine + ph_adjustment - turbidity_adjustment, 2)
     chlorine = max(0, min(2.0, chlorine))  # Clamp between 0-2.0 mg/L
     
+    # ORP (Oxidation-Reduction Potential) estimation in mV
+    # Healthy water: 200-700 mV
+    # Higher pH tends to lower ORP; turbidity can indicate chemical contamination
+    # This is an estimation until a dedicated ORP sensor is connected
+    base_orp = 450  # Typical healthy water ORP
+    ph_orp_adjustment = (7 - ph) * 50  # Lower pH = higher ORP (more oxidizing)
+    turbidity_orp_adjustment = turbidity / 50  # Higher turbidity lowers ORP
+    
+    orp = round(base_orp + ph_orp_adjustment - turbidity_orp_adjustment)
+    orp = max(-200, min(1000, orp))  # Clamp to realistic range
+    
     return {
         "pH": ph,
         "ph_voltage": ph_voltage,
@@ -145,6 +156,7 @@ def calculate_water_quality_metrics(sensor_data):
         "conductivity": conductivity,
         "dissolved_oxygen": do,
         "chlorine": chlorine,
+        "orp": orp,
         "wqi": wqi,
         "quality_status": quality_status
     }

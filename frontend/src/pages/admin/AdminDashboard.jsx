@@ -5,7 +5,7 @@ import {
     LogOut, LayoutDashboard, Users, Activity, Settings, Bell, Map as MapIcon,
     ClipboardList, CheckCircle, XCircle, Bot, Droplets, AlertTriangle,
     TrendingUp, TrendingDown, Download, ChevronRight, Filter, Radio, Eye, Mail, Users as UsersIcon,
-    Shield, Wrench
+    Shield, Wrench, Leaf, ShieldAlert
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import {
@@ -19,6 +19,8 @@ import TelemetryLogs from '../../components/dashboard/TelemetryLogs';
 import VisionInspection from '../../components/dashboard/VisionInspection';
 import ContactMessages from '../../components/dashboard/ContactMessages';
 import NewsletterSubscribers from '../../components/dashboard/NewsletterSubscribers';
+import PurificationPanel from '../../components/dashboard/PurificationPanel';
+import CRIPanel from '../../components/dashboard/CRIPanel';
 import { generateTanksList, generatePendingRequests, generateReportedIssues } from '../../utils/mockData';
 import { useSocket } from '../../context/SocketContext';
 
@@ -426,6 +428,26 @@ const AdminDashboard = () => {
                         >
                             <Wrench className="w-5 h-5" />
                             <span className="font-semibold">Field Ops</span>
+                        </motion.button>
+
+                        <motion.button
+                            onClick={() => setActiveTab('purification')}
+                            whileHover={{ x: 4, scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${activeTab === 'purification' ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-500/30' : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'}`}
+                        >
+                            <Leaf className="w-5 h-5" />
+                            <span className="font-semibold">Purification</span>
+                        </motion.button>
+
+                        <motion.button
+                            onClick={() => setActiveTab('cri')}
+                            whileHover={{ x: 4, scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${activeTab === 'cri' ? 'bg-gradient-to-r from-red-600 to-rose-600 text-white shadow-lg shadow-red-500/30' : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'}`}
+                        >
+                            <ShieldAlert className="w-5 h-5" />
+                            <span className="font-semibold">CRI Index</span>
                         </motion.button>
 
                         <motion.button
@@ -1122,6 +1144,16 @@ const AdminDashboard = () => {
                     {/* Telemetry Logs Tab */}
                     {activeTab === 'telemetry' && (
                         <TelemetryLogs userRole="admin" />
+                    )}
+
+                    {/* Purification Tab */}
+                    {activeTab === 'purification' && (
+                        <PurificationPanel userRole="admin" tanks={tanks} />
+                    )}
+
+                    {/* CRI Index Tab */}
+                    {activeTab === 'cri' && (
+                        <CRIPanel userRole="admin" />
                     )}
 
                     {/* AI Vision Tab */}

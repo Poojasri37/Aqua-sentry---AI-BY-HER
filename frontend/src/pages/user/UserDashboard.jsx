@@ -28,6 +28,7 @@ import {
     Eye,
     Radio,
     Shield,
+    ShieldAlert,
     Globe,
     Activity,
     Zap,
@@ -51,6 +52,8 @@ import UserNotifications from '../../components/dashboard/UserNotifications';
 import VisionInspection from '../../components/dashboard/VisionInspection';
 import TelemetryLogs from '../../components/dashboard/TelemetryLogs';
 import ReportIssueModal from '../../components/dashboard/ReportIssueModal';
+import PurificationPanel from '../../components/dashboard/PurificationPanel';
+import CRIPanel from '../../components/dashboard/CRIPanel';
 import { useSocket } from '../../context/SocketContext';
 
 // Fix Leaflet icon issue
@@ -121,25 +124,24 @@ const UserDashboard = () => {
                 const data = await response.json();
 
                 if (data.success) {
-                    // For Pooja, prioritize her real New Delhi data
+                    // For Pooja, prioritize her real Peelamedu data
                     if (isPooja) {
-                        const tanksData = data.data.length > 0 ? data.data : generateTanksList(3, 'New Delhi');
+                        const tanksData = data.data.length > 0 ? data.data : generateTanksList(1, 'Coimbatore');
                         const enhancedTanks = tanksData.map((t, idx) => ({
                             ...t,
                             location: {
-                                address: 'Pragati Maidan, New Delhi, Delhi',
-                                city: 'New Delhi',
-                                district: 'New Delhi',
-                                region: 'Pragati Maidan',
-                                lat: 28.6139 + (idx * 0.002),
-                                lng: 77.2090 + (idx * 0.002)
+                                address: 'Peelamedu, Coimbatore, Tamil Nadu',
+                                city: 'Coimbatore',
+                                district: 'Coimbatore',
+                                region: 'Peelamedu',
+                                lat: 11.0250 + (idx * 0.002),
+                                lng: 77.0120 + (idx * 0.002)
                             },
-                            // Overwrite name to match region if it's generic
-                            name: `Pragati Maidan Smart Tank ${idx + 1}`,
+                            name: `Peelamedu Smart Tank ${idx + 1}`,
                             id: `TN-CB-200${idx + 1}`
                         }));
                         setTanks(enhancedTanks);
-                        setRegion('Pragati Maidan, New Delhi');
+                        setRegion('Peelamedu, Coimbatore');
                         setAlerts(generateCoimbatoreAlerts());
                     } else if (user?.email === 'deepthitheeran@gmail.com') {
                         // For Deepthi, show mock Salem data if she hasn't set up her ESP32 yet
@@ -160,20 +162,20 @@ const UserDashboard = () => {
             } catch (error) {
                 console.error('Error fetching tanks:', error);
                 if (isPooja) {
-                    setTanks(generateTanksList(5, 'New Delhi').map((t, idx) => ({
+                    setTanks(generateTanksList(1, 'Coimbatore').map((t, idx) => ({
                         ...t,
                         location: {
-                            address: 'Pragati Maidan, New Delhi, Delhi',
-                            city: 'New Delhi',
-                            district: 'New Delhi',
-                            region: 'Pragati Maidan',
-                            lat: 28.6139 + (idx * 0.002),
-                            lng: 77.2090 + (idx * 0.002)
+                            address: 'Peelamedu, Coimbatore, Tamil Nadu',
+                            city: 'Coimbatore',
+                            district: 'Coimbatore',
+                            region: 'Peelamedu',
+                            lat: 11.0250 + (idx * 0.002),
+                            lng: 77.0120 + (idx * 0.002)
                         },
-                        name: `Pragati Maidan Smart Tank ${idx + 1}`,
+                        name: `Peelamedu Smart Tank ${idx + 1}`,
                         id: `TN-CB-200${idx + 1}`
                     })));
-                    setRegion('Pragati Maidan, New Delhi');
+                    setRegion('Peelamedu, Coimbatore');
                 } else {
                     setTanks(generateTanksList(5, 'Salem'));
                     setRegion('Salem District');
@@ -223,20 +225,20 @@ const UserDashboard = () => {
             if (parseFloat(lastReading.metrics.ph) > 8.5) {
                 newAlerts.push({
                     id: `alt_ph_${Date.now()}`,
-                    tankId: 'Pragati Maidan Smart Tank',
+                    tankId: 'Peelamedu Smart Tank',
                     type: 'pH Critical',
                     severity: 'critical',
-                    message: `pH level reached ${lastReading.metrics.ph} in Pragati Maidan`,
+                    message: `pH level reached ${lastReading.metrics.ph} in Peelamedu`,
                     time: 'Just now'
                 });
             }
             if (parseFloat(lastReading.metrics.turbidity) > 5) {
                 newAlerts.push({
                     id: `alt_turb_${Date.now()}`,
-                    tankId: 'Pragati Maidan Smart Tank',
+                    tankId: 'Peelamedu Smart Tank',
                     type: 'High Turbidity',
                     severity: 'critical',
-                    message: `Turbidity exceeded 5 NTU in Pragati Maidan`,
+                    message: `Turbidity exceeded 5 NTU in Peelamedu`,
                     time: 'Just now'
                 });
             }
@@ -331,6 +333,8 @@ const UserDashboard = () => {
             { id: 'maintenance', label: 'Maintenance', icon: Wrench },
             { id: 'vision', label: 'AI Vision', icon: Eye },
             { id: 'digital_twin', label: 'Digital Twin (3D)', icon: Globe },
+            { id: 'purification', label: 'Purification', icon: Droplets },
+            { id: 'cri', label: 'CRI Index', icon: ShieldAlert },
             { id: 'telemetry', label: 'Telemetry', icon: Radio },
             { id: 'logs', label: 'System Logs', icon: FileText },
         ];
@@ -779,7 +783,7 @@ const UserDashboard = () => {
                                         <UserTankMap tanks={tanks} />
 
                                         <div className="absolute bottom-8 right-8 bg-white/90 backdrop-blur-md p-6 rounded-3xl border border-white/20 shadow-2xl z-[400] w-64">
-                                            <h5 className="font-black text-slate-900 mb-4 text-sm tracking-tight italic">{isPooja ? 'New Delhi' : 'Salem'} Tank Status</h5>
+                                            <h5 className="font-black text-slate-900 mb-4 text-sm tracking-tight italic">{isPooja ? 'Peelamedu' : 'Salem'} Tank Status</h5>
                                             <div className="space-y-3">
                                                 <div className="flex items-center gap-3">
                                                     <div className="w-3 h-3 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]"></div>
@@ -808,7 +812,7 @@ const UserDashboard = () => {
                                         <div className="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm flex items-center justify-between mb-8">
                                             <div>
                                                 <div className="flex items-center gap-3 mb-1">
-                                                    <h4 className="text-xl font-black text-slate-900">{isPooja ? 'New Delhi Alerts Hub' : 'Alerts Hub (Live Feed)'}</h4>
+                                                    <h4 className="text-xl font-black text-slate-900">{isPooja ? 'Peelamedu Alerts Hub' : 'Alerts Hub (Live Feed)'}</h4>
                                                     {isConnected && (
                                                         <div className="flex items-center gap-1.5 px-2 py-0.5 bg-green-50 text-green-600 rounded-full border border-green-100 text-[10px] font-bold">
                                                             <div className="w-1 h-1 rounded-full bg-green-500 animate-pulse" />
@@ -850,6 +854,12 @@ const UserDashboard = () => {
                                                         </div>
                                                         <p className="text-slate-600 text-sm font-medium">{alert.message}</p>
                                                     </div>
+                                                    <button
+                                                        onClick={(e) => { e.stopPropagation(); setActiveTab('purification'); }}
+                                                        className="px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-xl text-[10px] font-black uppercase hover:bg-emerald-100 border border-emerald-200 transition-all flex-shrink-0"
+                                                    >
+                                                        🧪 Purify
+                                                    </button>
                                                     <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-slate-950 transition-colors" />
                                                 </motion.div>
                                             ))
@@ -1387,7 +1397,7 @@ const UserDashboard = () => {
                                                 </div>
                                                 <div className="space-y-2">
                                                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Regional Designation</label>
-                                                    <input type="text" readOnly value={`${isPooja ? 'New Delhi' : 'Salem'} Field Office - ${region}`} className="w-full px-6 py-4 bg-slate-100 border border-slate-200 rounded-2xl font-bold text-slate-400 cursor-not-allowed" />
+                                                    <input type="text" readOnly value={`${isPooja ? 'Coimbatore' : 'Salem'} Field Office - ${region}`} className="w-full px-6 py-4 bg-slate-100 border border-slate-200 rounded-2xl font-bold text-slate-400 cursor-not-allowed" />
                                                 </div>
                                                 <div className="pt-4 flex gap-4">
                                                     <button className="flex-1 py-4 bg-slate-900 text-white rounded-2xl font-black text-sm shadow-xl shadow-slate-900/10 hover:shadow-2xl transition-all">Update Secure Identity</button>
@@ -1453,6 +1463,18 @@ const UserDashboard = () => {
                                     <div className="card-premium p-8">
                                         <VisionInspection userRole="user" />
                                     </div>
+                                )
+                            }
+
+                            {
+                                activeTab === 'purification' && (
+                                    <PurificationPanel userRole="user" tanks={tanks} />
+                                )
+                            }
+
+                            {
+                                activeTab === 'cri' && (
+                                    <CRIPanel userRole="user" />
                                 )
                             }
 

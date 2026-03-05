@@ -107,11 +107,11 @@ export const getTankDetails = (id) => {
         baseCoords = { lat: 9.9252, lng: 78.1198 };
     } else if (isRealId) {
         // Fallback for real IDs (e.g. Pooja's login)
-        region = 'New Delhi';
-        regionName = 'Pragati Maidan';
-        district = 'New Delhi';
-        baseCoords = { lat: 28.6139, lng: 77.2090 }; // Pragati Maidan coords
-        wardNumber = '1'; // Specific ward for Pragati Maidan
+        region = 'Coimbatore';
+        regionName = 'Peelamedu';
+        district = 'Coimbatore';
+        baseCoords = { lat: 11.0250, lng: 77.0120 }; // Peelamedu coords
+        wardNumber = '1';
     }
 
     if (!isRealId) {
@@ -133,7 +133,7 @@ export const getTankDetails = (id) => {
     else if (ph < 6.8 || ph > 8.2 || turbidity > 3 || chlorine > 2.0) status = 'warning';
 
     const addr = isRealId
-        ? `Pragati Maidan, New Delhi, Delhi`
+        ? `Peelamedu, Coimbatore, Tamil Nadu`
         : `Ward ${wardNumber}, ${regionName}, ${district} District, Tamil Nadu`;
 
     return {
@@ -166,8 +166,8 @@ export const generatePendingRequests = () => {
 
 export const generateReportedIssues = () => {
     return [
-        { id: 'iss_1', tank: 'Pragati Maidan - Smart Tank', user: 'Pooja', partner: 'Pooja', issue: 'Unusual pH spike detected', date: '2026-02-04 09:30', aiSummary: 'Suspected chemical runoff due to nearby construction in New Delhi.', severity: 'critical' },
-        { id: 'iss_2', tank: 'Pragati Maidan - Ward 1', user: 'Admin User', partner: 'Admin User', issue: 'Sediment build-up detected', date: '2026-02-04 10:15', aiSummary: 'High turbidity levels suggesting filtration failure in Pragati Maidan sector.', severity: 'warning' },
+        { id: 'iss_1', tank: 'Peelamedu - Smart Tank', user: 'Pooja', partner: 'Pooja', issue: 'Unusual pH spike detected', date: '2026-02-04 09:30', aiSummary: 'Suspected chemical runoff due to nearby construction in Peelamedu.', severity: 'critical' },
+        { id: 'iss_2', tank: 'Peelamedu - Ward 1', user: 'Admin User', partner: 'Admin User', issue: 'Sediment build-up detected', date: '2026-02-04 10:15', aiSummary: 'High turbidity levels suggesting filtration failure in Peelamedu sector.', severity: 'warning' },
     ];
 };
 
@@ -180,8 +180,8 @@ export const generateAlerts = () => {
 
 export const generateCoimbatoreAlerts = () => {
     return [
-        { id: 'system_cb_1', tankId: 'TN-CB-2001', type: 'Turbidity Spike', severity: 'critical', message: 'Turbidity reached 6.2 NTU in Pragati Maidan, New Delhi', time: '5 mins ago' },
-        { id: 'system_cb_2', tankId: 'TN-CB-2002', type: 'Chlorine Dip', severity: 'warning', message: 'Chlorine levels dropped below 0.8 mg/L in Pragati Maidan, Ward 1', time: '45 mins ago' },
+        { id: 'system_cb_1', tankId: 'TN-CB-2001', type: 'Turbidity Spike', severity: 'critical', message: 'Turbidity reached 6.2 NTU in Peelamedu, Coimbatore', time: '5 mins ago' },
+        { id: 'system_cb_2', tankId: 'TN-CB-2002', type: 'Chlorine Dip', severity: 'warning', message: 'Chlorine levels dropped below 0.8 mg/L in Peelamedu, Ward 1', time: '45 mins ago' },
     ];
 };
 

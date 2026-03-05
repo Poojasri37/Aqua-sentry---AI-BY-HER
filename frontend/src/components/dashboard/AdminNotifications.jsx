@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, X, CheckCircle, User, MapPin, Droplets, Calendar, AlertTriangle, Wrench, FileText } from 'lucide-react';
+import { Bell, X, CheckCircle, User, MapPin, Droplets, Calendar, AlertTriangle, Wrench, FileText, Leaf, Timer } from 'lucide-react';
 
 const AdminNotifications = () => {
     const [notifications, setNotifications] = useState([]);
@@ -13,12 +13,14 @@ const AdminNotifications = () => {
             const assetNotifications = JSON.parse(localStorage.getItem('adminNotifications') || '[]');
             const issueNotifications = JSON.parse(localStorage.getItem('issueNotifications') || '[]');
             const maintenanceNotifications = JSON.parse(localStorage.getItem('maintenanceNotifications') || '[]');
+            const purificationNotifications = JSON.parse(localStorage.getItem('purificationNotifications') || '[]');
 
             // Combine all notifications with type
             const allNotifications = [
                 ...assetNotifications.map(n => ({ ...n, type: 'asset' })),
                 ...issueNotifications.map(n => ({ ...n, type: 'issue' })),
-                ...maintenanceNotifications.map(n => ({ ...n, type: 'maintenance' }))
+                ...maintenanceNotifications.map(n => ({ ...n, type: 'maintenance' })),
+                ...purificationNotifications.map(n => ({ ...n, type: 'purification' }))
             ].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
             setNotifications(allNotifications);
@@ -36,7 +38,8 @@ const AdminNotifications = () => {
         // 1. Determine specific storage key
         const storageKey = notification.type === 'asset' ? 'adminNotifications' :
             notification.type === 'issue' ? 'issueNotifications' :
-                'maintenanceNotifications';
+                notification.type === 'maintenance' ? 'maintenanceNotifications' :
+                    'purificationNotifications';
 
         // 2. Remove from Admin storage
         const stored = JSON.parse(localStorage.getItem(storageKey) || '[]');
@@ -56,6 +59,9 @@ const AdminNotifications = () => {
         } else if (notification.type === 'issue') {
             userMsg = `Maintenance dispatch confirmed for "${notification.issueDetails?.tankName}". Issue is being resolved.`;
             actionType = 'issue_resolved';
+        } else if (notification.type === 'purification') {
+            userMsg = `Natural purification process completed for ${notification.tankName}. Water quality improved.`;
+            actionType = 'purification_complete';
         } else {
             userMsg = `Your maintenance request from ${new Date(notification.timestamp).toLocaleDateString()} has been scheduled.`;
             actionType = 'maintenance_scheduled';
@@ -77,7 +83,8 @@ const AdminNotifications = () => {
     const handleDismiss = (notification, index) => {
         const storageKey = notification.type === 'asset' ? 'adminNotifications' :
             notification.type === 'issue' ? 'issueNotifications' :
-                'maintenanceNotifications';
+                notification.type === 'maintenance' ? 'maintenanceNotifications' :
+                    'purificationNotifications';
 
         const stored = JSON.parse(localStorage.getItem(storageKey) || '[]');
         const filtered = stored.filter(n => n.timestamp !== notification.timestamp);
@@ -90,6 +97,7 @@ const AdminNotifications = () => {
         localStorage.setItem('adminNotifications', JSON.stringify([]));
         localStorage.setItem('issueNotifications', JSON.stringify([]));
         localStorage.setItem('maintenanceNotifications', JSON.stringify([]));
+        localStorage.setItem('purificationNotifications', JSON.stringify([]));
         setNotifications([]);
     };
 
@@ -102,6 +110,7 @@ const AdminNotifications = () => {
             case 'asset': return <Droplets className="w-4 h-4 text-cyan-600" />;
             case 'issue': return <AlertTriangle className="w-4 h-4 text-red-600" />;
             case 'maintenance': return <Wrench className="w-4 h-4 text-amber-600" />;
+            case 'purification': return <Leaf className="w-4 h-4 text-emerald-600" />;
             default: return <Bell className="w-4 h-4" />;
         }
     };
@@ -111,6 +120,7 @@ const AdminNotifications = () => {
             case 'asset': return 'bg-cyan-50';
             case 'issue': return 'bg-red-50';
             case 'maintenance': return 'bg-amber-50';
+            case 'purification': return 'bg-emerald-50';
             default: return 'bg-slate-50';
         }
     };
@@ -120,6 +130,7 @@ const AdminNotifications = () => {
             case 'asset': return 'New Asset Registration';
             case 'issue': return 'Issue Reported';
             case 'maintenance': return 'Maintenance Request';
+            case 'purification': return 'Purification Active';
             default: return 'Notification';
         }
     };
@@ -174,6 +185,7 @@ const AdminNotifications = () => {
                                     { id: 'all', label: 'All', count: notifications.length },
                                     { id: 'asset', label: 'Assets', count: notifications.filter(n => n.type === 'asset').length },
                                     { id: 'issue', label: 'Issues', count: notifications.filter(n => n.type === 'issue').length },
+                                    { id: 'purification', label: 'AI Control', count: notifications.filter(n => n.type === 'purification').length },
                                     { id: 'maintenance', label: 'Maintenance', count: notifications.filter(n => n.type === 'maintenance').length }
                                 ].map(tab => (
                                     <button
@@ -281,6 +293,22 @@ const AdminNotifications = () => {
                                                             </>
                                                         )}
                                                     </div>
+
+                                                    {notification.type === 'purification' && (
+                                                        <>
+                                                            <div className="flex items-center gap-2 text-xs">
+                                                                <Leaf className="w-3 h-3 text-emerald-400" />
+                                                                <span className="text-slate-600 font-black">
+                                                                    {notification.tankName}
+                                                                </span>
+                                                            </div>
+                                                            <div className="p-2 bg-emerald-50 rounded-lg border border-emerald-100">
+                                                                <p className="text-xs text-emerald-800 font-medium italic">
+                                                                    "{notification.message}"
+                                                                </p>
+                                                            </div>
+                                                        </>
+                                                    )}
 
                                                     <div className="flex items-center justify-between">
                                                         <span className="text-[10px] text-slate-400 font-bold uppercase">
